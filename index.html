@@ -5,923 +5,1065 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#C41230">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#1a0810">
   <title>Budapest 2026 🇭🇺</title>
   <style>
+    /* ── TOKENS ── */
     :root {
-      --red: #C41230;
-      --red-light: #f8e8eb;
-      --green: #2A5C34;
-      --gold: #C8922A;
-      --bg: #F7F4EF;
-      --card: #fff;
-      --text: #1a1a1a;
-      --muted: #888;
-      --border: #ede8e0;
-      --nav-h: 64px;
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --radius: 14px;
-      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+      --red:#C41230; --red-dim:rgba(196,18,48,.12); --green:#2A5C34; --gold:#C8922A;
+      --bg:#F7F4EF; --card:#fff; --text:#1a1a1a; --muted:#888; --border:#ece6dc;
+      --nav-h:64px; --safe-b:env(safe-area-inset-bottom,0px); --r:14px;
+      --shadow:0 2px 14px rgba(0,0,0,.07);
     }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    html, body { height: 100%; overflow: hidden; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
+    /* ── SHELL ── */
+    #app{display:flex;flex-direction:column;height:100dvh;position:relative}
+    .screens{flex:1;position:relative;overflow:hidden}
+    .screen{
+      position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+      opacity:0;transform:translateY(18px);pointer-events:none;
+      transition:opacity .22s ease-out,transform .25s ease-out;
+      padding-bottom:calc(var(--nav-h) + var(--safe-b) + 4px);
     }
-
-    /* ── APP SHELL ── */
-    #app { display: flex; flex-direction: column; height: 100dvh; }
-
-    .screen {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      display: none;
-      padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 8px);
-    }
-    .screen.active { display: block; }
+    .screen.active{opacity:1;transform:translateY(0);pointer-events:auto}
+    .screen.exit{opacity:0;transform:translateY(-10px);transition:opacity .15s,transform .15s}
 
     /* ── ONBOARDING ── */
-    #onboarding {
-      position: fixed; inset: 0; z-index: 999;
-      background: linear-gradient(160deg, #1a0810 0%, #4a1020 45%, #152a18 100%);
-      display: flex; align-items: center; justify-content: center;
-      flex-direction: column; gap: 24px; padding: 32px;
-      text-align: center; color: white;
+    #onboarding{
+      position:fixed;inset:0;z-index:999;
+      background:linear-gradient(160deg,#1a0810 0%,#4a1020 48%,#152a18 100%);
+      display:flex;align-items:center;justify-content:center;
+      flex-direction:column;gap:20px;padding:40px 32px;text-align:center;color:#fff;
+      transition:opacity .4s;
     }
-    #onboarding h1 { font-size: 36px; font-weight: 200; letter-spacing: 0.15em; text-transform: uppercase; }
-    #onboarding p { font-size: 15px; opacity: 0.7; }
-    #onboarding .flag { font-size: 56px; }
-    .person-btns { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 280px; }
-    .person-btn {
-      padding: 16px; border-radius: 50px; border: 1.5px solid rgba(255,255,255,0.3);
-      background: rgba(255,255,255,0.08); color: white;
-      font-size: 16px; font-weight: 500; cursor: pointer;
-      transition: all 0.2s;
+    #onboarding.out{opacity:0;pointer-events:none}
+    #onboarding.hidden{display:none}
+    #onboarding .ob-flag{font-size:56px;line-height:1}
+    #onboarding h1{font-size:clamp(28px,8vw,42px);font-weight:200;letter-spacing:.18em;text-transform:uppercase}
+    #onboarding p{font-size:15px;opacity:.65;line-height:1.7}
+    .ob-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;margin-top:4px}
+    .ob-btn{
+      padding:15px;border-radius:50px;border:1.5px solid rgba(255,255,255,.28);
+      background:rgba(255,255,255,.07);color:#fff;font-size:15.5px;font-weight:500;
+      cursor:pointer;transition:all .2s;letter-spacing:.02em;
     }
-    .person-btn:hover, .person-btn:active { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.6); }
-    #onboarding.hidden { display: none; }
+    .ob-btn:hover,.ob-btn:active{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.6)}
 
     /* ── HEADER ── */
-    .app-header {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 16px 12px;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 50;
+    .app-header{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:12px 16px 10px;background:var(--card);border-bottom:1px solid var(--border);
+      flex-shrink:0;
     }
-    .app-header h2 { font-size: 17px; font-weight: 700; }
-    .app-header .sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
-    .avatar-btn {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: var(--red); color: white;
-      font-size: 13px; font-weight: 700;
-      border: none; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+    .hdr-title{font-size:17px;font-weight:700;line-height:1.2}
+    .hdr-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+    .avatar{
+      width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;
+      font-size:13px;font-weight:700;border:none;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;
     }
 
     /* ── BOTTOM NAV ── */
-    .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      height: calc(var(--nav-h) + var(--safe-bottom));
-      background: var(--card);
-      border-top: 1px solid var(--border);
-      display: flex; align-items: flex-start;
-      padding-top: 6px;
-      z-index: 100;
+    .bottom-nav{
+      position:fixed;bottom:0;left:0;right:0;
+      height:calc(var(--nav-h) + var(--safe-b));
+      background:var(--card);border-top:1px solid var(--border);
+      display:flex;align-items:flex-start;padding-top:6px;z-index:100;
     }
-    .nav-btn {
-      flex: 1; display: flex; flex-direction: column; align-items: center;
-      gap: 3px; background: none; border: none; cursor: pointer;
-      padding: 4px 0; color: var(--muted); font-size: 10.5px; font-weight: 500;
-      transition: color 0.15s;
-    }
-    .nav-btn .icon { font-size: 22px; line-height: 1; transition: transform 0.15s; }
-    .nav-btn.active { color: var(--red); }
-    .nav-btn.active .icon { transform: scale(1.1); }
+    .nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+        background:none;border:none;cursor:pointer;padding:3px 0;
+        color:var(--muted);font-size:10.5px;font-weight:500;transition:color .15s}
+    .nb .ico{font-size:0;line-height:1;display:block;width:26px;height:26px;transition:transform .15s}
+    .nb.active{color:var(--red)}
+    .nb.active .ico{transform:scale(1.08)}
 
-    /* ── SHARED COMPONENTS ── */
-    .section-pad { padding: 16px; }
-    .card {
-      background: var(--card); border-radius: var(--radius);
-      box-shadow: var(--shadow); overflow: hidden; margin-bottom: 14px;
-    }
-    .card-header {
-      font-size: 10.5px; font-weight: 700; letter-spacing: 0.09em;
-      text-transform: uppercase; color: var(--muted);
-      padding: 10px 14px; background: #fafaf8; border-bottom: 1px solid var(--border);
-    }
-    .row {
-      display: flex; padding: 11px 14px; gap: 12px;
-      border-bottom: 1px solid var(--border); align-items: flex-start;
-    }
-    .row:last-child { border-bottom: none; }
-    .row-time {
-      flex: 0 0 46px; font-size: 11.5px; color: var(--muted);
-      padding-top: 2px; font-variant-numeric: tabular-nums; line-height: 1.4;
-    }
-    .row-body { flex: 1; min-width: 0; }
-    .row-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; line-height: 1.35; }
-    .row-name a {
-      color: var(--text); text-decoration: none;
-      border-bottom: 1.5px solid var(--gold); padding-bottom: 1px;
-    }
-    .row-detail { font-size: 12px; color: var(--muted); line-height: 1.45; }
-    .tags { display: inline-flex; gap: 4px; margin-left: 5px; vertical-align: middle; }
-    .tag { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 6px; border-radius: 7px; }
-    .tag-dinner { background: #fff0f2; color: #c41230; }
-    .tag-lunch  { background: #fff8e8; color: #9a6100; }
-    .tag-baths  { background: #eaf4ff; color: #1255a0; }
-    .tag-book   { background: #edfbf2; color: #2a5c34; border: 1px solid #a8d5b5; }
-    .pill {
-      display: inline-block; background: var(--red); color: white;
-      font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; padding: 3px 12px; border-radius: 20px;
-    }
+    /* ── SVG ICONS for nav ── */
+    .ico svg{width:24px;height:24px;stroke-width:1.8;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
 
-    /* ── TODAY SCREEN ── */
-    .today-hero {
-      background: linear-gradient(155deg, #1a0810 0%, #4a1020 50%, #152a18 100%);
-      padding: 28px 20px 24px; color: white; text-align: center;
-    }
-    .today-date { font-size: 12px; opacity: 0.6; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
-    .today-hero h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-    .today-theme { font-size: 13px; opacity: 0.7; font-style: italic; }
-    .today-progress {
-      display: flex; gap: 6px; justify-content: center; margin-top: 16px;
-    }
-    .progress-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: rgba(255,255,255,0.25);
-    }
-    .progress-dot.done { background: rgba(255,255,255,0.9); }
-    .today-body { padding: 16px; }
+    /* ── SHARED CARDS ── */
+    .pad{padding:14px}
+    .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px}
+    .card-hdr{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:10px 14px;background:#fafaf8;border-bottom:1px solid var(--border)}
+    .row{display:flex;padding:11px 14px;gap:12px;border-bottom:1px solid var(--border);align-items:flex-start;cursor:pointer;transition:background .12s}
+    .row:last-child{border-bottom:none}
+    .row:active,.row.tappable:hover{background:#f8f4ee}
+    .rt{flex:0 0 46px;font-size:11.5px;color:var(--muted);padding-top:2px;font-variant-numeric:tabular-nums;line-height:1.35}
+    .rb{flex:1;min-width:0}
+    .rn{font-size:14px;font-weight:600;margin-bottom:2px;line-height:1.35}
+    .rn a{color:var(--text);text-decoration:none;border-bottom:1.5px solid var(--gold);padding-bottom:1px}
+    .rd{font-size:12px;color:var(--muted);line-height:1.45}
+    .row-arrow{font-size:13px;color:var(--border);margin-top:1px;flex-shrink:0}
+    .tags{display:inline-flex;gap:4px;margin-left:5px;vertical-align:middle}
+    .tag{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 6px;border-radius:7px}
+    .tag-d{background:#fff0f2;color:#c41230}
+    .tag-l{background:#fff8e8;color:#9a6100}
+    .tag-b{background:#eaf4ff;color:#1255a0}
+    .tag-r{background:#edfbf2;color:#2a5c34;border:1px solid #a8d5b5}
+    .pill{display:inline-block;background:var(--red);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 11px;border-radius:20px}
 
-    /* pre-trip / post-trip */
-    .pretrip-card {
-      background: var(--card); border-radius: var(--radius);
-      box-shadow: var(--shadow); padding: 24px 20px; text-align: center;
-      margin-bottom: 14px;
-    }
-    .pretrip-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-    .pretrip-card p { font-size: 14px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
-    .pretrip-card .countdown { font-size: 36px; font-weight: 200; color: var(--red); margin: 8px 0; }
-    .cta-btn {
-      display: inline-block; background: var(--red); color: white;
-      padding: 12px 24px; border-radius: 50px; font-size: 14px; font-weight: 600;
-      border: none; cursor: pointer; text-decoration: none;
-    }
+    /* ── HERO SECTION (SVG illustrations) ── */
+    .day-hero{position:relative;overflow:hidden;padding:28px 20px 22px;color:#fff;text-align:center}
+    .day-hero svg.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .hero-content{position:relative;z-index:2}
+    .hero-date{font-size:11px;opacity:.6;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
+    .hero-title{font-size:20px;font-weight:700;margin-bottom:3px;line-height:1.2}
+    .hero-theme{font-size:12.5px;opacity:.7;font-style:italic}
+    .hero-dots{display:flex;gap:6px;justify-content:center;margin-top:14px}
+    .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25)}
+    .dot.on{background:rgba(255,255,255,.9)}
 
-    /* ── ITINERARY SCREEN ── */
-    .day-tabs {
-      display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch;
-      scrollbar-width: none; gap: 0;
-      background: var(--card); border-bottom: 1px solid var(--border);
-      position: sticky; top: 57px; z-index: 40;
-    }
-    .day-tabs::-webkit-scrollbar { display: none; }
-    .day-tab {
-      flex: 0 0 auto; padding: 11px 16px; font-size: 12.5px; font-weight: 500;
-      color: var(--muted); border: none; background: none; cursor: pointer;
-      border-bottom: 2.5px solid transparent; white-space: nowrap;
-      transition: all 0.15s;
-    }
-    .day-tab.active { color: var(--red); border-bottom-color: var(--red); }
-    .day-content { padding: 16px; display: none; }
-    .day-content.active { display: block; }
-    .day-intro { margin-bottom: 16px; }
-    .day-intro h2 { font-size: 20px; font-weight: 700; margin: 6px 0 3px; }
-    .day-intro p { font-size: 13px; color: var(--muted); font-style: italic; }
+    /* SVG gradients per day */
+    .hero-d1{background:linear-gradient(160deg,#0d0820 0%,#1a0f2e 40%,#0d1f10 100%)}
+    .hero-d2{background:linear-gradient(155deg,#2d1200 0%,#5c2a00 45%,#1a1000 100%)}
+    .hero-d3{background:linear-gradient(155deg,#1a0a2e 0%,#3d1060 45%,#1a0820 100%)}
+    .hero-d4{background:linear-gradient(155deg,#001020 0%,#002244 45%,#0a001a 100%)}
+    .hero-d5{background:linear-gradient(155deg,#1a0808 0%,#400010 45%,#180818 100%)}
+    .hero-pre{background:linear-gradient(160deg,#0a1830 0%,#1a0a2e 50%,#0a1010 100%)}
 
-    /* ── PACKING SCREEN ── */
-    .packing-header {
-      background: var(--card); border-bottom: 1px solid var(--border);
-      padding: 12px 16px; position: sticky; top: 57px; z-index: 40;
-    }
-    .packing-tabs {
-      display: flex; gap: 8px;
-    }
-    .packing-tab {
-      flex: 1; padding: 8px; border-radius: 10px; border: 1.5px solid var(--border);
-      background: none; font-size: 13px; font-weight: 500; color: var(--muted);
-      cursor: pointer; transition: all 0.15s; text-align: center;
-    }
-    .packing-tab.active { border-color: var(--red); background: var(--red-light); color: var(--red); }
-    .packing-progress {
-      display: flex; align-items: center; gap: 8px;
-      margin-top: 10px;
-    }
-    .progress-bar {
-      flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
-    }
-    .progress-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.3s; }
-    .progress-text { font-size: 11px; color: var(--muted); white-space: nowrap; }
-    .packing-body { padding: 16px; }
-    .packing-section { margin-bottom: 8px; }
-    .packing-section-title {
-      font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--muted);
-      padding: 6px 0; margin-bottom: 4px;
-    }
-    .packing-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-    .pack-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 14px; border-bottom: 1px solid var(--border);
-      cursor: pointer; transition: background 0.1s;
-    }
-    .pack-item:last-child { border-bottom: none; }
-    .pack-item:active { background: #f5f0ea; }
-    .pack-item.checked .item-name { text-decoration: line-through; color: var(--muted); }
-    .pack-checkbox {
-      width: 22px; height: 22px; border-radius: 50%;
-      border: 2px solid var(--border); flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.15s;
-    }
-    .pack-item.checked .pack-checkbox { background: var(--green); border-color: var(--green); }
-    .pack-checkbox::after { content: ''; display: none; }
-    .pack-item.checked .pack-checkbox::after {
-      display: block; width: 5px; height: 9px;
-      border: 2px solid white; border-top: none; border-left: none;
-      transform: rotate(42deg) translate(-1px, -1px);
-    }
-    .item-name { font-size: 14px; flex: 1; }
-    .item-cat {
-      font-size: 10px; color: var(--muted); background: var(--border);
-      padding: 2px 7px; border-radius: 6px; flex-shrink: 0;
-    }
+    /* ── TODAY ── */
+    .today-body{padding:14px}
+    .pretrip{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 20px;text-align:center;margin-bottom:12px}
+    .pretrip h2{font-size:19px;font-weight:700;margin-bottom:8px}
+    .pretrip p{font-size:14px;color:var(--muted);margin-bottom:18px;line-height:1.65}
+    .countdown{font-size:48px;font-weight:200;color:var(--red);margin:4px 0 8px;letter-spacing:-.02em}
+    .cta{display:inline-block;background:var(--red);color:#fff;padding:12px 24px;border-radius:50px;font-size:14px;font-weight:600;border:none;cursor:pointer;text-decoration:none;transition:opacity .15s}
+    .cta:active{opacity:.8}
+    .section-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin:16px 0 8px 2px}
 
-    /* ── INFO SCREEN ── */
-    .info-body { padding: 16px; }
-    .info-card {
-      background: var(--card); border-radius: var(--radius);
-      box-shadow: var(--shadow); overflow: hidden; margin-bottom: 14px;
+    /* ── ITINERARY ── */
+    .day-tabs{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40}
+    .day-tabs::-webkit-scrollbar{display:none}
+    .day-tab{flex:0 0 auto;padding:10px 15px;font-size:12.5px;font-weight:500;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;transition:all .15s}
+    .day-tab.active{color:var(--red);border-bottom-color:var(--red)}
+    .day-panel{display:none;padding:14px}
+    .day-panel.active{display:block}
+    .day-intro{margin-bottom:14px}
+    .day-intro h2{font-size:19px;font-weight:700;margin:6px 0 3px}
+    .day-intro p{font-size:13px;color:var(--muted);font-style:italic}
+
+    /* ── PACKING ── */
+    .pack-hdr{background:var(--card);border-bottom:1px solid var(--border);padding:10px 14px;position:sticky;top:0;z-index:40}
+    .pack-type-tabs{display:flex;gap:8px;margin-bottom:10px}
+    .ptab{flex:1;padding:8px;border-radius:10px;border:1.5px solid var(--border);background:none;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;text-align:center}
+    .ptab.active{border-color:var(--red);background:var(--red-dim);color:var(--red)}
+    .prog-bar-wrap{display:flex;align-items:center;gap:8px}
+    .prog-bar{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+    .prog-fill{height:100%;background:var(--green);border-radius:3px;transition:width .4s ease}
+    .prog-txt{font-size:11px;color:var(--muted);white-space:nowrap;min-width:36px;text-align:right}
+    .pack-body{padding:14px}
+    .cat-label{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px 2px}
+    .cat-label:first-child{margin-top:0}
+    .pack-card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:4px}
+    .pi{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;-webkit-user-select:none;user-select:none}
+    .pi:last-child{border-bottom:none}
+    .pi:active{background:#f5f0ea}
+    .pi.checked .pi-name{text-decoration:line-through;color:var(--muted)}
+    .pi-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .pi.checked .pi-check{background:var(--green);border-color:var(--green)}
+    .pi-tick{display:none;width:5px;height:9px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(42deg) translate(-1px,-1px)}
+    .pi.checked .pi-tick{display:block}
+    .pi-name{font-size:14px;flex:1;transition:color .2s}
+    .pi-cat{font-size:10px;color:var(--muted);background:var(--border);padding:2px 7px;border-radius:6px;flex-shrink:0}
+
+    /* ── INFO ── */
+    .info-body{padding:14px}
+    .ic{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px}
+    .ic-hdr{padding:14px 16px;font-size:15px;font-weight:700;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;cursor:pointer}
+    .ic-hdr .chev{margin-left:auto;color:var(--muted);font-size:13px;transition:transform .2s}
+    .ic-hdr.open .chev{transform:rotate(180deg)}
+    .ic-body{padding:14px 16px;display:none}
+    .ic-body.open{display:block}
+    .ir{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13.5px}
+    .ir:last-child{border-bottom:none}
+    .iv{font-weight:600;color:var(--red)}
+    .callout{border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.6;margin-bottom:8px}
+    .cb{background:#e8f4ff;color:#1255a0}
+    .cg{background:#edfbf2;color:#2a5c34}
+    .cy{background:#fff8e8;color:#9a6100}
+    .phrase{padding:9px 0;border-bottom:1px solid var(--border)}
+    .phrase:last-child{border-bottom:none}
+    .phr-fr{font-weight:600;font-size:13.5px;margin-bottom:2px}
+    .phr-hu{color:var(--muted);font-style:italic;font-size:13px}
+    .phr-pr{font-size:11.5px;color:#bbb}
+
+    /* ── DETAIL SHEET ── */
+    #det-back{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
+    #det-back.show{opacity:1;pointer-events:auto}
+    #det-sheet{
+      position:fixed;bottom:0;left:0;right:0;background:var(--card);
+      border-radius:22px 22px 0 0;max-height:82vh;overflow-y:auto;
+      z-index:301;transform:translateY(100%);
+      transition:transform .35s cubic-bezier(.32,0,.2,1);
+      padding-bottom:calc(24px + var(--safe-b));
     }
-    .info-card-header {
-      padding: 14px 16px; font-size: 15px; font-weight: 700;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 8px; cursor: pointer;
-    }
-    .info-card-body { padding: 14px 16px; display: none; }
-    .info-card-body.open { display: block; }
-    .info-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13.5px;
-    }
-    .info-row:last-child { border-bottom: none; }
-    .info-row .val { font-weight: 600; color: var(--red); }
-    .phrase-row { padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
-    .phrase-row:last-child { border-bottom: none; }
-    .phrase-fr { font-weight: 600; margin-bottom: 2px; }
-    .phrase-hu { color: var(--muted); font-style: italic; font-size: 13px; }
-    .phrase-pron { font-size: 11.5px; color: #aaa; }
-    .callout {
-      background: #e8f4ff; border-radius: 10px; padding: 12px 14px;
-      font-size: 13px; line-height: 1.6; margin-bottom: 8px; color: #1255a0;
-    }
-    .callout.green { background: #edfbf2; color: #2a5c34; }
+    #det-sheet.show{transform:translateY(0)}
+    .ds-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
+    .ds-head{padding:16px 18px 0}
+    .ds-type{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .ds-title{font-size:20px;font-weight:700;line-height:1.2;margin-bottom:6px}
+    .ds-desc{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+    .ds-section{padding:0 18px;margin-bottom:16px}
+    .ds-section-title{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+    .fact-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+    .fact-list li{font-size:13.5px;line-height:1.5;padding-left:16px;position:relative}
+    .fact-list li::before{content:"→";position:absolute;left:0;color:var(--red);font-size:12px;top:1px}
+    .stop-list{display:flex;flex-direction:column;gap:0}
+    .stop{border-bottom:1px solid var(--border);padding:10px 0;display:flex;gap:10px;align-items:flex-start}
+    .stop:last-child{border-bottom:none}
+    .stop-num{width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+    .stop-body{}
+    .stop-name{font-size:13.5px;font-weight:600;margin-bottom:2px}
+    .stop-detail{font-size:12px;color:var(--muted)}
+    .prac-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .prac-item{background:var(--bg);border-radius:10px;padding:10px 12px}
+    .prac-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+    .prac-val{font-size:13.5px;font-weight:600}
+    .ds-map-btn{display:block;margin:0 18px 0;padding:13px;background:var(--red);color:#fff;border-radius:12px;text-align:center;font-size:14px;font-weight:600;text-decoration:none;transition:opacity .15s}
+    .ds-map-btn:active{opacity:.8}
+
   </style>
 </head>
 <body>
 
 <!-- ONBOARDING -->
 <div id="onboarding">
-  <span class="flag">🇭🇺</span>
-  <h1>Budapest</h1>
-  <p>20 → 24 avril 2026<br>Tu es qui ?</p>
-  <div class="person-btns">
-    <button class="person-btn" onclick="setPerson('Aurélie')">👩 Aurélie</button>
-    <button class="person-btn" onclick="setPerson('Joana')">👩 Joana</button>
-    <button class="person-btn" onclick="setPerson('Manon')">👩 Manon</button>
+  <svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg" width="160" height="144" style="margin-bottom:8px">
+    <defs>
+      <radialGradient id="gr" cx="40%" cy="35%"><stop offset="0%" stop-color="#e84060"/><stop offset="100%" stop-color="#C41230"/></radialGradient>
+      <radialGradient id="gg" cx="40%" cy="35%"><stop offset="0%" stop-color="#3d7a48"/><stop offset="100%" stop-color="#2A5C34"/></radialGradient>
+      <radialGradient id="go" cx="40%" cy="35%"><stop offset="0%" stop-color="#daa840"/><stop offset="100%" stop-color="#C8922A"/></radialGradient>
+    </defs>
+    <line x1="100" y1="32" x2="62"  y2="96" stroke="rgba(255,255,255,0.22)" stroke-width="1.4" stroke-linecap="round"/>
+    <line x1="100" y1="32" x2="138" y2="96" stroke="rgba(255,255,255,0.22)" stroke-width="1.4" stroke-linecap="round"/>
+    <line x1="62"  y1="96" x2="138" y2="96" stroke="rgba(255,255,255,0.22)" stroke-width="1.4" stroke-linecap="round"/>
+    <circle cx="100" cy="32"  r="14" fill="url(#gr)"/>
+    <circle cx="62"  cy="96"  r="14" fill="url(#gg)"/>
+    <circle cx="138" cy="96"  r="14" fill="url(#go)"/>
+    <circle cx="96"  cy="28"  r="4" fill="rgba(255,255,255,0.25)"/>
+    <circle cx="58"  cy="92"  r="4" fill="rgba(255,255,255,0.2)"/>
+    <circle cx="134" cy="92"  r="4" fill="rgba(255,255,255,0.2)"/>
+    <text x="100" y="132" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" font-size="15" font-weight="600" letter-spacing="5" fill="#ffffff">BUDAPEST</text>
+    <text x="100" y="150" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" font-size="12" font-weight="300" letter-spacing="8" fill="rgba(255,255,255,0.55)">2026</text>
+  </svg>
+  <p id="ob-p">20 → 24 avril 2026<br>Tu es qui ?</p>
+  <div class="ob-btns">
+    <button class="ob-btn" onclick="setPerson('Aurélie')">Aurélie</button>
+    <button class="ob-btn" onclick="setPerson('Joana')">Joana</button>
+    <button class="ob-btn" onclick="setPerson('Manon')">Manon</button>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app">
-
-  <!-- HEADER -->
   <header class="app-header">
     <div>
-      <div class="app-header h2" id="header-title">Budapest 🇭🇺</div>
-      <div class="app-header sub" id="header-sub">20–24 avril 2026</div>
+      <div class="hdr-title" id="hdr-title">Budapest 🇭🇺</div>
+      <div class="hdr-sub" id="hdr-sub">20–24 avril 2026</div>
     </div>
-    <button class="avatar-btn" id="avatar-btn" onclick="resetPerson()" title="Changer de personne"></button>
+    <button class="avatar" id="avatar" onclick="resetPerson()"></button>
   </header>
 
-  <!-- TODAY SCREEN -->
-  <div class="screen active" id="screen-today">
-    <div id="today-content"></div>
+  <div class="screens">
+    <div class="screen active" id="screen-today"></div>
+    <div class="screen" id="screen-itinerary"></div>
+    <div class="screen" id="screen-packing"></div>
+    <div class="screen" id="screen-info"></div>
   </div>
 
-  <!-- ITINERARY SCREEN -->
-  <div class="screen" id="screen-itinerary">
-    <div class="day-tabs" id="day-tabs"></div>
-    <div id="day-panels"></div>
-  </div>
-
-  <!-- PACKING SCREEN -->
-  <div class="screen" id="screen-packing">
-    <div class="packing-header">
-      <div class="packing-tabs" id="packing-tabs">
-        <button class="packing-tab active" onclick="setPackSection('must')">✅ Must have</button>
-        <button class="packing-tab" onclick="setPackSection('nice')">✨ Nice to have</button>
-      </div>
-      <div class="packing-progress">
-        <div class="progress-bar"><div class="progress-fill" id="pack-progress-fill"></div></div>
-        <span class="progress-text" id="pack-progress-text">0 / 0</span>
-      </div>
-    </div>
-    <div class="packing-body" id="packing-body"></div>
-  </div>
-
-  <!-- INFO SCREEN -->
-  <div class="screen" id="screen-info">
-    <div class="info-body" id="info-body"></div>
-  </div>
-
-  <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
-    <button class="nav-btn active" id="nav-today" onclick="goTo('today')">
-      <span class="icon">🏠</span><span>Aujourd'hui</span>
+    <button class="nb active" id="nb-today" onclick="goTo('today')">
+      <span class="ico"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span>
+      <span id="nb-today-lbl">Aujourd'hui</span>
     </button>
-    <button class="nav-btn" id="nav-itinerary" onclick="goTo('itinerary')">
-      <span class="icon">📅</span><span>Itinéraire</span>
+    <button class="nb" id="nb-itinerary" onclick="goTo('itinerary')">
+      <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+      <span id="nb-itin-lbl">Itinéraire</span>
     </button>
-    <button class="nav-btn" id="nav-packing" onclick="goTo('packing')">
-      <span class="icon">🎒</span><span>Valise</span>
+    <button class="nb" id="nb-packing" onclick="goTo('packing')">
+      <span class="ico"><svg viewBox="0 0 24 24"><path d="M6 2h12l2 6H4L6 2z"/><rect x="2" y="8" width="20" height="14" rx="2"/><path d="M9 8v2a3 3 0 0 0 6 0V8"/></svg></span>
+      <span id="nb-pack-lbl">Valise</span>
     </button>
-    <button class="nav-btn" id="nav-info" onclick="goTo('info')">
-      <span class="icon">ℹ️</span><span>Infos</span>
+    <button class="nb" id="nb-info" onclick="goTo('info')">
+      <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 12v4"/></svg></span>
+      <span id="nb-info-lbl">Infos</span>
     </button>
   </nav>
 </div>
 
+<!-- DETAIL SHEET -->
+<div id="det-back" onclick="closeDetail()"></div>
+<div id="det-sheet">
+  <div class="ds-handle"></div>
+  <div id="det-content"></div>
+</div>
+
 <script>
-// ─────────────────────────────────────────────
-// DATA
-// ─────────────────────────────────────────────
-
-const TRIP_START = new Date('2026-04-20');
-const TRIP_END   = new Date('2026-04-24');
-
-const DAYS = [
-  {
-    num: 1, date: '2026-04-20', label: 'Lun 20', title: 'Arrivée + Gellért Hill + Croisière',
-    theme: 'Cinema & Complicity — Reunion & Softness', emoji: '✈️',
-    sections: [
-      { title: '☀️ Matin — Aurélie & Manon', rows: [
-        { t:'08:20', n:'Atterrissage Budapest Airport', d:null, l:null },
-        { t:'~09:45', n:'Dorado Café', d:'Dohány utca 13 · Petit déj', l:'https://maps.google.com/?q=Dorado+Café+Dohány+utca+Budapest' },
-        { t:'10:15', n:'Marvel Walking Tour', d:'Heroes\' Square · Vajdahunyad Castle · Parliament · Nyugati Station', l:null, links:[{t:"Heroes' Square",l:'https://maps.google.com/?q=Heroes+Square+Budapest'},{t:"Vajdahunyad Castle",l:'https://maps.google.com/?q=Vajdahunyad+Castle+Budapest'}] },
-        { t:'~12:30', n:'Street Food Karaván', d:'Kazinczy u. 18 · Lángos, burgers, 8 food trucks', l:'https://maps.google.com/?q=Street+Food+Karaván+Budapest', tags:['lunch'] },
-      ]},
-      { title: '🌇 Après-midi & Soirée — Toutes les trois', rows: [
-        { t:'14:00', n:'Joana atterrit · Check-in Airbnb', d:'Ferenc körút 34, District IX', l:null },
-        { t:'~17:00', n:'Gellért Hill', d:'15 min à pied · Vue panoramique · Café Citadelle au sommet', l:'https://maps.google.com/?q=Gellért+Hill+Budapest' },
-        { t:'19:30', n:'Silver Line Sunset Cruise', d:'Dock 11, près du pont Élisabeth · ~70 min · dès ~€9/pers', l:'https://maps.google.com/?q=Silver+Line+Cruise+Budapest' },
-        { t:'~21:00', n:'Twentysix Budapest', d:'Király u. 26 · Jungle tropicale · Méditerranéen', l:'https://maps.google.com/?q=Twentysix+Budapest', tags:['dinner','book'] },
-      ]},
-    ]
+// ═══════════════════════════════════════════════
+// I18N
+// ═══════════════════════════════════════════════
+const L = {
+  fr:{
+    today:"Aujourd'hui", itin:"Itinéraire", pack:"Valise", info:"Infos",
+    days_sub:"5 jours · 4 nuits", pack_sub:"Checklist de",
+    must:"✅ Must have", nice:"✨ Nice to have",
+    morning:"Matin", afternoon:"Après-midi", evening:"Soirée",
+    td:"Dîner", tl:"Déj", tb:"Termes", tr:"Résa",
+    almost:"On y est presque ! ✈️", almost2:"Préparez vos valises, les filles",
+    daysLeft:"Plus que", daysUnit:"jour", start_msg:"Le voyage commence le <strong>lundi 20 avril</strong>.",
+    pack_ready:"Ta valise est prête ?", see_pack:"Voir ma checklist 🎒",
+    overview:"Aperçu du voyage",
+    magic:"C'était magique 🥲", magic2:"Zero regrets (sauf si vous avez sauté les thermes)",
+    see_itin:"Revoir l'itinéraire 📅",
+    qui:"Tu es qui ?", date_sub:"20 → 24 avril 2026",
+    practical:"Infos pratiques", facts:"Le saviez-vous ?", stops:"Étapes du tour",
+    open_maps:"Voir sur Google Maps →", close_sheet:"Fermer",
+    day:"Jour",
   },
-  {
-    num: 2, date: '2026-04-21', label: 'Mar 21', title: 'Côté Buda + Termes', emoji: '🏰',
-    theme: 'Imperial Budapest & Panoramas',
-    sections: [
-      { title: '🦁 Tour Buda', rows: [
-        { t:'~10:00', n:'Chain Bridge', d:'À pied · vues · 10–15 min', l:'https://maps.google.com/?q=Chain+Bridge+Budapest' },
-        { t:'~10:20', n:'Funiculaire (Budavári Sikló)', d:'Clark Ádám tér → Castle Hill · ~€8/pers', l:'https://maps.google.com/?q=Budavári+Sikló+Budapest' },
-        { t:'~10:30', n:'Buda Castle & Palais Royal', d:'Grounds · Fontaine Matthias · Turul · vues sur Pest', l:'https://maps.google.com/?q=Buda+Castle+Budapest' },
-        { t:'~11:30', n:"Fisherman's Bastion", d:'Meilleures vues · terrasse basse gratuite · haute ~€4', l:'https://maps.google.com/?q=Fisherman%27s+Bastion+Budapest' },
-        { t:'~12:15', n:'Matthias Church (extérieur)', d:'Toit à motifs de diamants', l:'https://maps.google.com/?q=Matthias+Church+Budapest' },
-        { t:'~12:35', n:'Vienna Gate (Bécsi Kapu)', d:'Porte médiévale · calme · belles vues', l:'https://maps.google.com/?q=Vienna+Gate+Budapest' },
-        { t:'~13:00', n:'Fekete Holló', d:'Castle District · Intérieur voûté médiéval · Paprikash', l:'https://maps.google.com/?q=Fekete+Holló+Budapest', tags:['lunch'] },
-      ]},
-      { title: '🛁 Après-midi — Termes', rows: [
-        { t:'~14:45', n:'Gül Baba Garden & Türbe', d:'Jardin ottoman · 5 min de Lukács · 15 min', l:'https://maps.google.com/?q=Gül+Baba+Türbe+Budapest' },
-        { t:'15:00', n:'Lukács Thermal Baths', d:'Frankel Leó út 25-29 · dès ~€18 · ouvert jusqu\'à 22h', l:'https://maps.google.com/?q=Lukács+Thermal+Baths+Budapest', tags:['baths'] },
-      ]},
-      { title: '🌙 Soirée', rows: [
-        { t:'19:30', n:'Kádár Étkezde', d:'District VII · Tables communes · Poulet paprikás', l:'https://maps.google.com/?q=Kádár+Étkezde+Budapest', tags:['dinner','book'] },
-        { t:'21:00', n:'New York Café', d:'Erzsébet krt. 9-11 · Dobos Torte · Le plus beau café du monde', l:'https://maps.google.com/?q=New+York+Kávéház+Budapest' },
-        { t:'22:00', n:'Szimpla Kert', d:'Kazinczy u. 14 · Le ruin bar original', l:'https://maps.google.com/?q=Szimpla+Kert+Budapest' },
-      ]},
-    ]
-  },
-  {
-    num: 3, date: '2026-04-22', label: 'Mer 22', title: 'Bory Castle + Île Marguerite', emoji: '🏯',
-    theme: 'Fairytale & Romantic Escape',
-    sections: [
-      { title: '🚉 Excursion — Székesfehérvár', rows: [
-        { t:'~09:30', n:'Train vers Székesfehérvár', d:'Depuis Kelenföld · direct · ~50 min · ~€3–4/pers', l:null },
-        { t:'10:30', n:'Bory Castle', d:'Máriavölgy u. 54 · Construit sur 40 ans, monument d\'amour · ~€5/pers · 2h30', l:'https://maps.google.com/?q=Bory+Castle+Székesfehérvár' },
-        { t:'~13:30', n:'Déjeuner Fő utca', d:'Rue pavée · bâtiments baroques · au choix sur place', l:null, tags:['lunch'] },
-        { t:'~14:30', n:'Train retour Budapest', d:'~50 min · arrivée Kelenföld ~15:20', l:null },
-      ]},
-      { title: '🌿 Après-midi — Île Marguerite', rows: [
-        { t:'~16:00', n:'Margaret Island', d:'Fontaine musicale · Roseraie · Ruines · Tour à eau · Jardin japonais · ~2h', l:'https://maps.google.com/?q=Margaret+Island+Budapest' },
-      ]},
-      { title: '🌙 Soirée', rows: [
-        { t:'19:30', n:'Salt Budapest', d:'Királyi Pál utca, District IX · Cosy · Jazz & soul · Cuisine moderne', l:'https://maps.google.com/?q=Salt+Budapest+Királyi+Pál+utca', tags:['dinner'] },
-        { t:'~21:30', n:'🧖 Self Care Night', d:'Masques · Film + popcorn · Airbnb', l:null },
-      ]},
-    ]
-  },
-  {
-    num: 4, date: '2026-04-23', label: 'Jeu 23', title: 'Côté Pest + Rudas + 🎂', emoji: '🏙️',
-    theme: 'Culture, Hidden Gems & Birthday Evening',
-    sections: [
-      { title: '🌅 Matin', rows: [
-        { t:'~09:30', n:'Ráday utca — Café du matin', d:'Rue des cafés de Budapest · 5 min de l\'Airbnb', l:null },
-        { t:'~10:10', n:'Liberty Bridge (Szabadság híd)', d:'Pont en fer vert · oiseaux Turul · petits marchés', l:'https://maps.google.com/?q=Liberty+Bridge+Budapest' },
-      ]},
-      { title: '🛒 Midi — Grand Marché', rows: [
-        { t:'11:00', n:'Grand Marché Central', d:'Fővám tér 1-3 · RDC: paprika, Tokaji, pálinka · 1er étage: déjeuner + chimney cake 🍮', l:'https://maps.google.com/?q=Great+Market+Hall+Budapest', tags:['lunch'] },
-      ]},
-      { title: '🚶 Après-midi — Circuit Pest', rows: [
-        { t:'~13:30', n:'Promenade du Danube', d:'Vers le nord · vues Buda Castle & tous les ponts', l:null },
-        { t:'~14:00', n:'Párisi Udvar', d:'Arcade Art Nouveau · vitraux · carreaux Zsolnay', l:'https://maps.google.com/?q=Párisi+Udvar+Budapest' },
-        { t:'~14:35', n:'Shoes on the Danube', d:'Mémorial de l\'Holocauste · 60 chaussures en fer · puissant', l:'https://maps.google.com/?q=Shoes+on+the+Danube+Budapest' },
-        { t:'~15:10', n:'Parlement', d:'Extérieur · Kossuth tér · l\'un des bâtiments les plus impressionnants d\'Europe', l:'https://maps.google.com/?q=Hungarian+Parliament+Budapest' },
-        { t:'~15:35', n:'Basilique Saint-Étienne', d:'Extérieur + intérieur · montée dôme optionnelle (~€8)', l:'https://maps.google.com/?q=St+Stephen%27s+Basilica+Budapest' },
-        { t:'~16:20', n:'New York Café', d:'Dobos Torte + café · 30 min', l:'https://maps.google.com/?q=New+York+Kávéház+Budapest' },
-        { t:'~16:55', n:'Ervin Szabó Library 🔍', d:'Gold Room · escalier en colimaçon · lustres en cristal · gem caché', l:'https://maps.google.com/?q=Ervin+Szabó+Library+Budapest' },
-        { t:'~17:30', n:'Quartier Juif & Dohány Synagogue', d:'Street art · cour · ~45 min', l:'https://maps.google.com/?q=Dohány+Street+Synagogue+Budapest' },
-      ]},
-      { title: '🛁 Soirée — Termes & Dîner d\'anniversaire', rows: [
-        { t:'18:30', n:'Rudas Thermal Baths — Rooftop', d:'Döbrentei tér 9 · ~€30/pers · piscine rooftop · vue Danube · coucher ~20:00', l:'https://maps.google.com/?q=Rudas+Thermal+Baths+Budapest', tags:['baths'] },
-        { t:'~20:30', n:'Mazel Tov 🎂', d:'Akácfa u. 47 · Guirlandes · Méditerranéen-Hongrois · Dîner d\'anniversaire', l:'https://maps.google.com/?q=Mazel+Tov+Budapest', tags:['dinner','book'] },
-      ]},
-    ]
-  },
-  {
-    num: 5, date: '2026-04-24', label: 'Ven 24', title: 'Départ ✈️', emoji: '🥲',
-    theme: 'See you next time, Budapest',
-    sections: [
-      { title: '🌅 Matin', rows: [
-        { t:'Matin', n:'Petit déj à l\'Airbnb · Bagages', d:null, l:null },
-        { t:'TBD', n:'Transfert aéroport', d:'Métro M3 + Bus 200E', l:null },
-      ]},
-    ]
+  pt:{
+    today:"Hoje", itin:"Itinerário", pack:"Mala", info:"Infos",
+    days_sub:"5 dias · 4 noites", pack_sub:"Checklist de",
+    must:"✅ Essenciais", nice:"✨ Opcionais",
+    morning:"Manhã", afternoon:"Tarde", evening:"Noite",
+    td:"Jantar", tl:"Almoço", tb:"Termas", tr:"Reserva",
+    almost:"Já estamos quase! ✈️", almost2:"Preparem as malas, meninas",
+    daysLeft:"Faltam", daysUnit:"dia", start_msg:"A viagem começa na <strong>segunda-feira, 20 de abril</strong>.",
+    pack_ready:"Sua mala está pronta?", see_pack:"Ver minha checklist 🎒",
+    overview:"Prévia da viagem",
+    magic:"Foi mágico 🥲", magic2:"Zero arrependimentos (a não ser que tenham pulado as termas)",
+    see_itin:"Ver o itinerário 📅",
+    qui:"Você é quem?", date_sub:"20 → 24 de abril de 2026",
+    practical:"Informações práticas", facts:"Você sabia?", stops:"Paradas do tour",
+    open_maps:"Ver no Google Maps →", close_sheet:"Fechar",
+    day:"Dia",
   }
+};
+function t(k){ const lang=currentPerson==='Joana'?'pt':'fr'; return L[lang][k]||k; }
+
+// ═══════════════════════════════════════════════
+// ACTIVITY DETAILS DATA
+// ═══════════════════════════════════════════════
+const DETAILS = {
+  'Marvel Walking Tour':{
+    type:'walking',
+    desc:"Budapest a servi de décor à 9 productions Marvel entre 2019 et 2022. Ce tour révèle les lieux réels derrière les scènes.",
+    stops:[
+      {n:"Anker köz, District VI", d:"Moon Knight — scène d'ouverture où Marc se réveille"},
+      {n:"Adria Palace, Szabadság Square", d:"Black Widow — planque de Natasha"},
+      {n:"Alkotmány utca", d:"Black Widow — poursuite du Taskmaster"},
+      {n:"Parliament (extérieur)", d:"Black Widow — plans d'introduction"},
+      {n:"Nyugati Station", d:"Black Widow — explosion + scène de métro · Kolodko : Skála Kópé"},
+      {n:"Heroes' Square / Musée des Beaux-Arts", d:"Moon Knight — scènes du musée"},
+      {n:"Vajdahunyad Castle, City Park", d:"Moon Knight — scène du cimetière · Kolodko : Dracula (hommage à Béla Lugosi)"},
+    ],
+    practical:{duration:"~2h15", type:"Gratuit", tip:"Prendre les captures d'écran des scènes avant de partir !"},
+    map:"https://maps.google.com/?q=Anker+köz+Budapest"
+  },
+  "Fisherman's Bastion":{
+    type:'landmark',
+    desc:"L'un des spots les plus photogéniques de Budapest, avec une vue à 360° sur le Danube et le Parlement.",
+    facts:[
+      "Construit entre 1895 et 1902 par Frigyes Schulek",
+      "Nommé d'après la guilde des pêcheurs qui défendait ce tronçon des remparts au Moyen Âge",
+      "Les 7 tours représentent les 7 tribus magyares qui se sont installées dans le bassin des Carpates en 895",
+      "La terrasse basse est entièrement gratuite — seules les passerelles supérieures sont payantes (~€4)",
+    ],
+    practical:{price:"Gratuit (terrasse basse)", duration:"~40 min", hours:"Toujours ouvert"},
+    map:"https://maps.google.com/?q=Fisherman%27s+Bastion+Budapest"
+  },
+  'Bory Castle':{
+    type:'day-trip',
+    desc:"Un château de conte de fées bâti par amour, entièrement de la main d'un seul homme.",
+    facts:[
+      "Construit entre 1923 et 1959 par le sculpteur Jenő Bory — seul, avec ses étudiants, l'été",
+      "C'était un monument d'amour pour sa femme Ilona Komócsin",
+      "Il y a créé des centaines de statues, fresques et peintures, toutes de sa propre main",
+      "36 étés de construction. Le résultat : un château avec 4 tours, des terrasses panoramiques et un jardin de sculptures",
+    ],
+    practical:{price:"~€5/pers", duration:"~2h30", hours:"09:00–17:00"},
+    map:"https://maps.google.com/?q=Bory+Castle+Székesfehérvár"
+  },
+  'Lukács Thermal Baths':{
+    type:'baths',
+    desc:"Les thermes les plus authentiques de Budapest — moins touristiques que Széchenyi, appréciés des locaux.",
+    facts:[
+      "Des bains existent sur ce site depuis le XIIIe siècle — les bâtiments actuels datent de 1894",
+      "Les sources naturelles produisent une eau à 22–65°C, riche en minéraux",
+      "Les habitués laissaient autrefois des plaques de marbre en guise de remerciement — certaines sont encore visibles sur les murs",
+    ],
+    practical:{price:"Dès ~€18", duration:"2h30", hours:"Ouvert jusqu'à 22h le mardi"},
+    map:"https://maps.google.com/?q=Lukács+Thermal+Baths+Budapest"
+  },
+  'Rudas Thermal Baths — Rooftop':{
+    type:'baths',
+    desc:"Bains ottomans du XVIe siècle avec une piscine rooftop moderne sur le Danube — le combo parfait.",
+    facts:[
+      "Construits vers 1550 sous le pacha ottoman Sokollu Mustafa — parmi les plus anciens bains de Budapest",
+      "La coupole centrale octogonale avec ses colonnes est un pur chef-d'œuvre d'architecture ottomane",
+      "La piscine rooftop panoramique a été ajoutée récemment — vue directe sur le Danube et le pont Élisabeth",
+      "Le coucher de soleil est prévu vers 20:00 fin avril — timing parfait depuis le rooftop",
+    ],
+    practical:{price:"~€30/pers (rooftop)", duration:"1h30", hours:"Ouvert en soirée"},
+    map:"https://maps.google.com/?q=Rudas+Thermal+Baths+Budapest"
+  },
+  'New York Café':{
+    type:'cafe',
+    desc:"Le café le plus extravagant du monde — baroque, doré, et totalement assumé.",
+    facts:[
+      "Ouvert en 1894 dans le bâtiment New York Life Insurance",
+      "À l'époque communiste, transformé en dépôt d'équipements de natation — difficile à imaginer",
+      "Rouvert en 2006 après une restauration à 20 millions d'euros",
+      "Le Dobos Torte (gâteau hongrois au caramel) est une institution ici — commandez-le sans hésiter",
+    ],
+    practical:{price:"~€15–25/pers", duration:"45 min", hours:"08:00–24:00"},
+    map:"https://maps.google.com/?q=New+York+Kávéház+Budapest"
+  },
+  'Szimpla Kert':{
+    type:'bar',
+    desc:"Le premier ruin bar du monde. Un concept né à Budapest qui a changé la culture nocturne européenne.",
+    facts:[
+      "Ouvert en 2002 dans une usine abandonnée — c'était le tout premier ruin bar au monde",
+      "Les ruin bars (romkocsmák) ont transformé les bâtiments délabrés de Budapest en lieux de vie",
+      "Szimpla organise aussi un marché de producteurs locaux le dimanche matin",
+      "Apparu dans CNN, NY Times, Time Magazine... Mais ça reste authentique",
+    ],
+    practical:{price:"Entrée libre", duration:"Aussi longtemps que vous voulez", hours:"Dès 15h"},
+    map:"https://maps.google.com/?q=Szimpla+Kert+Budapest"
+  },
+  'Margaret Island':{
+    type:'park',
+    desc:"Une île verte et car-free au milieu du Danube — parfaite pour décompresser après Bory Castle.",
+    facts:[
+      "2,5 km de long, entièrement piétonne (sauf taxis pour les hôtels)",
+      "Une princesse hongroise du XIIIe siècle (Marguerite, fille du roi Béla IV) y a grandi dans un couvent dominicain",
+      "Les cerisiers et rosiers sont en pleine floraison en avril — timing parfait pour vous",
+      "La fontaine musicale joue des mélodies toutes les heures — un classique",
+    ],
+    practical:{price:"Gratuit", duration:"~2h à flâner", hours:"Toujours accessible"},
+    map:"https://maps.google.com/?q=Margaret+Island+Budapest"
+  },
+  'Grand Marché Central':{
+    type:'market',
+    desc:"Le plus grand marché couvert de Budapest — iron, Zsolnay et paprika sous une même charpente.",
+    facts:[
+      "Inauguré en 1897, conçu par Samu Pecz — la charpente en fer vient des ateliers d'Eiffel à Paris",
+      "Restauré en 1994 grâce à un financement de la Banque Mondiale",
+      "Les tuiles colorées sur le toit sont de la manufacture Zsolnay de Pécs — célèbres dans toute l'Europe",
+      "1er étage : cuisine hongroise sur le pouce + premier chimney cake avec Joana 🎉",
+    ],
+    practical:{price:"Entrée libre", duration:"~2h", hours:"06:00–17:00 (lun–sam)"},
+    map:"https://maps.google.com/?q=Great+Market+Hall+Budapest"
+  },
+  'Parliament':{
+    type:'landmark',
+    desc:"Le bâtiment le plus reconnaissable de Budapest — 691 pièces, 29 escaliers, et les joyaux de la couronne à l'intérieur.",
+    facts:[
+      "Construit entre 1885 et 1904 — aujourd'hui 3e plus grand parlement du monde",
+      "Hauteur exacte : 96 mètres — symbolise le millénaire de 1896, date fondatrice de la Hongrie",
+      "Contient 691 pièces, 29 escaliers et 10 cours intérieures",
+      "Les joyaux de la couronne de saint Étienne sont conservés dans la Salle des Gardes",
+    ],
+    practical:{price:"Extérieur gratuit", duration:"~25 min", hours:"Accessible 24h"},
+    map:"https://maps.google.com/?q=Hungarian+Parliament+Budapest"
+  },
+  'Shoes on the Danube':{
+    type:'memorial',
+    desc:"Le mémorial le plus émouvant de Budapest — 60 paires de chaussures en fer sur la berge du Danube.",
+    facts:[
+      "Créé en 2005 par le réalisateur Can Togay et le sculpteur Gyula Pauer",
+      "Rend hommage aux Juifs fusillés par les miliciens des Croix-Fléchées en 1944–45",
+      "Les victimes étaient forcées d'enlever leurs chaussures (précieuses à l'époque) avant d'être jetées dans le Danube",
+      "60 paires de chaussures en fonte, moulées dans le style des années 1940",
+    ],
+    practical:{price:"Gratuit", duration:"~15 min", hours:"Toujours accessible"},
+    map:"https://maps.google.com/?q=Shoes+on+the+Danube+Budapest"
+  },
+  'Silver Line Sunset Cruise':{
+    type:'cruise',
+    desc:"La meilleure façon de voir Budapest : depuis le Danube, au coucher du soleil.",
+    facts:[
+      "Le coucher du soleil est prévu vers 20:00 fin avril — partez à 19:30 pour voir la transition",
+      "On passe sous 5 ponts mythiques : Elisabeth, Liberté, Chaînes, Marguerite et Arpad",
+      "Budapest est l'une des rares villes où un site UNESCO entier est visible depuis un bateau",
+      "Prenez la photo du pont des Chaînes depuis l'eau — la vue la plus iconique",
+    ],
+    practical:{price:"Dès ~€9/pers", duration:"~70 min", hours:"Départ 19:30"},
+    map:"https://maps.google.com/?q=Silver+Line+Cruise+Budapest"
+  },
+  'Ervin Szabó Library':{
+    type:'hidden',
+    desc:"La salle dorée la plus méconnue de Budapest — un bijou baroque caché dans une bibliothèque publique.",
+    facts:[
+      "Construite en 1887 comme hôtel particulier pour le comte Wenckheim — donnée à la ville en 1926",
+      "La Gold Room est une salle de lecture entièrement ornée de stuc doré, lustres en cristal et boiseries sculptées",
+      "L'escalier en colimaçon est l'un des plus photographiés de Budapest (mais peu de touristes le savent)",
+      "Entrée gratuite avec la bibliothèque — il suffit de sonner à l'accueil",
+    ],
+    practical:{price:"Gratuit", duration:"~30 min", hours:"10:00–20:00 (lun–ven)"},
+    map:"https://maps.google.com/?q=Ervin+Szabó+Library+Budapest"
+  },
+  'Gellért Hill':{
+    type:'viewpoint',
+    desc:"La meilleure vue sur Budapest — Buda, Pest, le Danube et tous les ponts d'un seul regard.",
+    facts:[
+      "235 mètres d'altitude — visible depuis presque partout dans la ville",
+      "La Statue de la Liberté au sommet a été érigée en 1947 pour commémorer la libération soviétique de la Hongrie",
+      "15 minutes à pied depuis l'Airbnb le long du Danube — commencez tôt pour éviter la chaleur",
+      "Le Café Citadelle au sommet a une terrasse avec vue imprenable",
+    ],
+    practical:{price:"Gratuit", duration:"~1h30 (montée + vue)", hours:"Toujours accessible"},
+    map:"https://maps.google.com/?q=Gellért+Hill+Budapest"
+  },
+  'Chain Bridge':{
+    type:'landmark',
+    desc:"Le premier pont permanent entre Buda et Pest — symbole de l'unification de la ville.",
+    facts:[
+      "Inauguré en 1849, c'était le premier pont permanent reliant Buda et Pest",
+      "Conçu par l'ingénieur anglais William Tierney Clark — son jumeau existe à Londres (Hammersmith Bridge)",
+      "Détruit en 1945 par les Allemands en retraite, reconstruit exactement 100 ans après son inauguration (1949)",
+      "Les lions à chaque extrémité sont légendaires — la légende dit qu'ils n'ont pas de langue (c'est faux !)",
+    ],
+    practical:{price:"Gratuit", duration:"~15 min", hours:"Toujours ouvert"},
+    map:"https://maps.google.com/?q=Chain+Bridge+Budapest"
+  },
+};
+
+// ═══════════════════════════════════════════════
+// ITINERARY DATA
+// ═══════════════════════════════════════════════
+const DAYS=[
+ {num:1,date:'2026-04-20',tab:'✈️ Lun 20',title:'Arrivée + Gellért Hill + Croisière',theme:'Cinema & Complicity — Reunion & Softness',heroClass:'hero-d1',
+  sections:[
+   {title_key:'morning',suffix:'— Aurélie & Manon',rows:[
+    {t:'08:20',n:"Atterrissage Budapest Airport",d:null,l:null},
+    {t:'~09:45',n:'Dorado Café',d:'Dohány utca 13 · Petit déj',l:'https://maps.google.com/?q=Dorado+Café+Budapest',det:null},
+    {t:'10:15',n:'Marvel Walking Tour',d:"Heroes' Square · Vajdahunyad Castle · Parliament · Nyugati Station",l:null,det:'Marvel Walking Tour'},
+    {t:'~12:30',n:'Street Food Karaván',d:'Kazinczy u. 18 · Lángos, burgers, 8 food trucks',l:'https://maps.google.com/?q=Street+Food+Karaván+Budapest',tags:['l']},
+   ]},
+   {title_key:'afternoon',suffix:'— Toutes les trois',rows:[
+    {t:'14:00',n:"Joana atterrit · Check-in Airbnb",d:'Ferenc körút 34, District IX',l:null},
+    {t:'~17:00',n:'Gellért Hill',d:'15 min à pied · Vue panoramique · Café Citadelle au sommet',l:'https://maps.google.com/?q=Gellért+Hill+Budapest',det:'Gellért Hill'},
+    {t:'19:30',n:'Silver Line Sunset Cruise',d:'Dock 11, près du pont Élisabeth · ~70 min · dès ~€9/pers',l:'https://maps.google.com/?q=Silver+Line+Cruise+Budapest',det:'Silver Line Sunset Cruise'},
+    {t:'~21:00',n:'Twentysix Budapest',d:'Király u. 26 · Jungle tropicale · Méditerranéen',l:'https://maps.google.com/?q=Twentysix+Budapest',tags:['d','r']},
+   ]},
+  ]},
+ {num:2,date:'2026-04-21',tab:'🏰 Mar 21',title:'Côté Buda + Termes',theme:'Imperial Budapest & Panoramas',heroClass:'hero-d2',
+  sections:[
+   {title_key:'morning',suffix:'— Tour Buda',rows:[
+    {t:'~10:00',n:'Chain Bridge',d:'À pied · vues · 10–15 min',l:'https://maps.google.com/?q=Chain+Bridge+Budapest',det:'Chain Bridge'},
+    {t:'~10:20',n:'Funiculaire (Budavári Sikló)',d:'Clark Ádám tér → Castle Hill · ~€8/pers',l:'https://maps.google.com/?q=Budavári+Sikló+Budapest'},
+    {t:'~10:30',n:'Buda Castle & Palais Royal',d:'Grounds · Fontaine Matthias · Turul · vues sur Pest',l:'https://maps.google.com/?q=Buda+Castle+Budapest'},
+    {t:'~11:30',n:"Fisherman's Bastion",d:'Meilleures vues · terrasse basse gratuite · haute ~€4',l:'https://maps.google.com/?q=Fisherman%27s+Bastion+Budapest',det:"Fisherman's Bastion"},
+    {t:'~12:15',n:'Matthias Church (extérieur)',d:'Toit à motifs de diamants',l:'https://maps.google.com/?q=Matthias+Church+Budapest'},
+    {t:'~12:35',n:'Vienna Gate (Bécsi Kapu)',d:'Porte médiévale · calme · belles vues',l:'https://maps.google.com/?q=Vienna+Gate+Budapest'},
+    {t:'~13:00',n:'Fekete Holló',d:'Castle District · Voûtes médiévales · Paprikash',l:'https://maps.google.com/?q=Fekete+Holló+Budapest',tags:['l']},
+   ]},
+   {title_key:'afternoon',suffix:'— Termes',rows:[
+    {t:'~14:45',n:'Gül Baba Garden & Türbe',d:'Jardin ottoman · 5 min de Lukács',l:'https://maps.google.com/?q=Gül+Baba+Türbe+Budapest'},
+    {t:'15:00',n:'Lukács Thermal Baths',d:'Frankel Leó út 25-29 · dès ~€18 · ouvert jusqu\'à 22h',l:'https://maps.google.com/?q=Lukács+Thermal+Baths+Budapest',tags:['b'],det:'Lukács Thermal Baths'},
+   ]},
+   {title_key:'evening',suffix:'',rows:[
+    {t:'19:30',n:'Kádár Étkezde',d:'District VII · Tables communes · Poulet paprikás',l:'https://maps.google.com/?q=Kádár+Étkezde+Budapest',tags:['d','r']},
+    {t:'21:00',n:'New York Café',d:'Erzsébet krt. 9-11 · Dobos Torte · Le plus beau café du monde',l:'https://maps.google.com/?q=New+York+Kávéház+Budapest',det:'New York Café'},
+    {t:'22:00',n:'Szimpla Kert',d:'Kazinczy u. 14 · Le ruin bar original',l:'https://maps.google.com/?q=Szimpla+Kert+Budapest',det:'Szimpla Kert'},
+   ]},
+  ]},
+ {num:3,date:'2026-04-22',tab:'🏯 Mer 22',title:'Bory Castle + Île Marguerite',theme:'Fairytale & Romantic Escape',heroClass:'hero-d3',
+  sections:[
+   {title_key:'morning',suffix:'— Excursion Székesfehérvár',rows:[
+    {t:'~09:30',n:'Train vers Székesfehérvár',d:'Depuis Kelenföld · direct · ~50 min · ~€3–4/pers',l:null},
+    {t:'10:30',n:'Bory Castle',d:'Máriavölgy u. 54 · Monument d\'amour · ~€5/pers · 2h30',l:'https://maps.google.com/?q=Bory+Castle+Székesfehérvár',det:'Bory Castle'},
+    {t:'~13:30',n:'Déjeuner Fő utca',d:'Rue pavée · bâtiments baroques · au choix sur place',l:null,tags:['l']},
+    {t:'~14:30',n:'Train retour Budapest',d:'~50 min · arrivée Kelenföld ~15:20',l:null},
+   ]},
+   {title_key:'afternoon',suffix:'— Île Marguerite',rows:[
+    {t:'~16:00',n:'Margaret Island',d:'Fontaine musicale · Roseraie · Ruines · Tour à eau · Jardin japonais · ~2h',l:'https://maps.google.com/?q=Margaret+Island+Budapest',det:'Margaret Island'},
+   ]},
+   {title_key:'evening',suffix:'',rows:[
+    {t:'19:30',n:'Salt Budapest',d:'Királyi Pál utca, District IX · Cosy · Jazz & soul',l:'https://maps.google.com/?q=Salt+Budapest',tags:['d']},
+    {t:'~21:30',n:'Self Care Night',d:'Masques · Film + popcorn · Airbnb',l:null},
+   ]},
+  ]},
+ {num:4,date:'2026-04-23',tab:'🏙️ Jeu 23',title:'Côté Pest + Rudas + 🎂',theme:'Culture, Hidden Gems & Birthday Evening',heroClass:'hero-d4',
+  sections:[
+   {title_key:'morning',suffix:'',rows:[
+    {t:'~09:30',n:'Ráday utca — Café du matin',d:'Rue des cafés de Budapest · 5 min de l\'Airbnb',l:null},
+    {t:'~10:10',n:'Liberty Bridge (Szabadság híd)',d:'Pont en fer vert · Turul · petits marchés',l:'https://maps.google.com/?q=Liberty+Bridge+Budapest'},
+   ]},
+   {title_key:'morning',suffix:'— Grand Marché',rows:[
+    {t:'11:00',n:'Grand Marché Central',d:'Fővám tér 1-3 · RDC: paprika, Tokaji, pálinka · 1er: déj + chimney cake 🍮',l:'https://maps.google.com/?q=Great+Market+Hall+Budapest',tags:['l'],det:'Grand Marché Central'},
+   ]},
+   {title_key:'afternoon',suffix:'— Circuit Pest',rows:[
+    {t:'~13:30',n:'Promenade du Danube',d:'Vers le nord · vues Buda Castle & tous les ponts',l:null},
+    {t:'~14:00',n:'Párisi Udvar',d:'Arcade Art Nouveau · vitraux · carreaux Zsolnay',l:'https://maps.google.com/?q=Párisi+Udvar+Budapest'},
+    {t:'~14:35',n:'Shoes on the Danube',d:'Mémorial de l\'Holocauste · 60 chaussures en fer',l:'https://maps.google.com/?q=Shoes+on+the+Danube+Budapest',det:'Shoes on the Danube'},
+    {t:'~15:10',n:'Parlement',d:'Extérieur · Kossuth tér',l:'https://maps.google.com/?q=Hungarian+Parliament+Budapest',det:'Parliament'},
+    {t:'~15:35',n:'Basilique Saint-Étienne',d:'Extérieur + intérieur · montée dôme optionnelle (~€8)',l:'https://maps.google.com/?q=St+Stephen%27s+Basilica+Budapest'},
+    {t:'~16:20',n:'New York Café',d:'Dobos Torte + café · 30 min',l:'https://maps.google.com/?q=New+York+Kávéház+Budapest',det:'New York Café'},
+    {t:'~16:55',n:'Ervin Szabó Library',d:'Gold Room · escalier · lustres · gem caché',l:'https://maps.google.com/?q=Ervin+Szabó+Library+Budapest',det:'Ervin Szabó Library'},
+    {t:'~17:30',n:'Quartier Juif & Dohány Synagogue',d:'Street art · cour · ~45 min',l:'https://maps.google.com/?q=Dohány+Street+Synagogue+Budapest'},
+   ]},
+   {title_key:'evening',suffix:'— Termes & Anniversaire',rows:[
+    {t:'18:30',n:'Rudas Thermal Baths — Rooftop',d:'Döbrentei tér 9 · ~€30/pers · vue Danube · coucher ~20:00',l:'https://maps.google.com/?q=Rudas+Thermal+Baths+Budapest',tags:['b'],det:'Rudas Thermal Baths — Rooftop'},
+    {t:'~20:30',n:'Mazel Tov 🎂',d:'Akácfa u. 47 · Guirlandes · Méditerranéen-Hongrois',l:'https://maps.google.com/?q=Mazel+Tov+Budapest',tags:['d','r']},
+   ]},
+  ]},
+ {num:5,date:'2026-04-24',tab:'🥲 Ven 24',title:'Départ ✈️',theme:"See you next time, Budapest",heroClass:'hero-d5',
+  sections:[
+   {title_key:'morning',suffix:'',rows:[
+    {t:'Matin',n:'Petit déj à l\'Airbnb · Bagages',d:null,l:null},
+    {t:'TBD',n:'Transfert aéroport',d:'Métro M3 + Bus 200E',l:null},
+   ]},
+  ]},
 ];
 
-const PACKING = {
-  must: [
-    { cat:'Vêtements', item:'Veste légère' },
-    { cat:'Vêtements', item:'Pulls / manches longues' },
-    { cat:'Vêtements', item:'Chaussures de marche confortables' },
-    { cat:'Vêtements', item:'Écharpe (légère)' },
-    { cat:'Vêtements', item:'Maillot de bain' },
-    { cat:'Vêtements', item:'Tongs (pour les thermes)' },
-    { cat:'Vêtements', item:'Serviette microfibre' },
-    { cat:'Toilette', item:'Brosse à dents & dentifrice' },
-    { cat:'Toilette', item:'Shampoing & gel douche' },
-    { cat:'Toilette', item:'Crème hydratante' },
-    { cat:'Toilette', item:'Crème solaire' },
-    { cat:'Toilette', item:'Déodorant' },
-    { cat:'Toilette', item:'Brosse à cheveux' },
-    { cat:'Thermes', item:'Housse étanche pour téléphone' },
-    { cat:'Thermes', item:'Bouteille d\'eau réutilisable' },
-    { cat:'Tech', item:'Téléphone + chargeur' },
-    { cat:'Tech', item:'Batterie portable' },
-    { cat:'Documents', item:'Passeport' },
-    { cat:'Documents', item:'Confirmation de vol' },
-    { cat:'Documents', item:'Assurance voyage' },
-    { cat:'Extras', item:'Petit sac à dos / day bag' },
-    { cat:'Extras', item:'Lunettes de soleil' },
-    { cat:'Extras', item:'Masque de sommeil' },
-    { cat:'Extras', item:'Bonnet de nuit' },
-    { cat:'Extras', item:'Médicaments (+ ordonnance)' },
+// SVG illustrations per day
+const SVGS = {
+  hero_d1: `<svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <rect width="400" height="200" fill="none"/>
+    ${[...Array(22)].map((_,i)=>`<circle cx="${20+i*18+Math.sin(i*2.3)*8}" cy="${10+Math.cos(i*1.7)*12}" r="${0.8+Math.sin(i)*0.5}" fill="white" opacity="${0.3+Math.random()*0.4}"/>`).join('')}
+    <path d="M0 130 Q30 120 60 125 Q90 130 120 128 Q150 126 180 130 Q210 134 240 128 Q270 122 300 126 Q330 130 360 124 Q390 118 400 122 L400 200 L0 200Z" fill="rgba(255,255,255,0.06)"/>
+    <rect x="148" y="78" width="10" height="58" rx="2" fill="rgba(255,255,255,0.18)"/>
+    <path d="M148 78 L153 68 L158 78Z" fill="rgba(255,255,255,0.22)"/>
+    <rect x="242" y="78" width="10" height="58" rx="2" fill="rgba(255,255,255,0.18)"/>
+    <path d="M242 78 L247 68 L252 78Z" fill="rgba(255,255,255,0.22)"/>
+    <path d="M153 72 Q200 52 247 72" stroke="rgba(255,255,255,0.2)" fill="none" stroke-width="1.5"/>
+    <path d="M153 78 Q200 60 247 78" stroke="rgba(255,255,255,0.15)" fill="none" stroke-width="1"/>
+    <rect x="110" y="134" width="180" height="3" rx="1.5" fill="rgba(255,255,255,0.22)"/>
+    <path d="M110 134 L110 140 M290 134 L290 140" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+    <ellipse cx="200" cy="58" rx="14" ry="14" fill="rgba(255,220,100,0.15)"/>
+    <ellipse cx="200" cy="58" rx="8" ry="8" fill="rgba(255,220,100,0.2)"/>
+  </svg>`,
+  hero_d2: `<svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <defs><radialGradient id="g2" cx="50%" cy="60%"><stop offset="0%" stop-color="rgba(255,160,40,0.25)"/><stop offset="100%" stop-color="rgba(255,80,0,0)"/></radialGradient></defs>
+    <ellipse cx="200" cy="120" rx="120" ry="80" fill="url(#g2)"/>
+    ${[60,110,160,200,240,290,340].map((x,i)=>{const h=50+[30,45,35,60,40,38,28][i];const w=[14,18,14,20,16,14,12][i];return `<rect x="${x-w/2}" y="${160-h}" width="${w}" height="${h}" rx="1" fill="rgba(255,255,255,0.14)"/><path d="M${x-w/2} ${160-h} L${x} ${160-h-12} L${x+w/2} ${160-h}Z" fill="rgba(255,255,255,0.18)"/>`}).join('')}
+    <path d="M0 158 L400 158 L400 200 L0 200Z" fill="rgba(0,0,0,0.25)"/>
+    <path d="M30 158 Q100 148 200 155 Q300 162 370 150 L400 158" stroke="rgba(255,255,255,0.1)" fill="none" stroke-width="1"/>
+  </svg>`,
+  hero_d3: `<svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    ${[...Array(18)].map((_,i)=>`<circle cx="${15+i*22+Math.sin(i)*6}" cy="${8+Math.cos(i*2)*10}" r="${0.7+Math.sin(i*1.5)*0.4}" fill="white" opacity="${0.25+Math.sin(i)*0.15}"/>`).join('')}
+    <circle cx="300" cy="45" r="22" fill="rgba(255,255,200,0.12)"/>
+    <circle cx="300" cy="45" r="16" fill="rgba(255,255,200,0.18)"/>
+    <circle cx="308" cy="40" r="12" fill="rgba(20,10,40,0.5)"/>
+    ${[[130,55,12,80],[160,40,10,90],[200,48,16,85],[240,42,12,82],[270,56,10,78]].map(([x,yOff,w,h])=>`<rect x="${x-w/2}" y="${yOff}" width="${w}" height="${h}" rx="1" fill="rgba(255,255,255,0.14)"/><path d="M${x-w/2} ${yOff} L${x} ${yOff-14} L${x+w/2} ${yOff}Z" fill="rgba(255,255,255,0.2)"/><rect x="${x-w/2}" y="${yOff+12}" width="${w}" height="4" fill="rgba(255,255,255,0.1)"/>`).join('')}
+    <path d="M100 135 L300 135 L300 200 L100 200Z" fill="rgba(255,255,255,0.04)"/>
+  </svg>`,
+  hero_d4: `<svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <defs><radialGradient id="g4" cx="50%" cy="80%"><stop offset="0%" stop-color="rgba(100,160,255,0.2)"/><stop offset="100%" stop-color="rgba(0,20,60,0)"/></radialGradient></defs>
+    <ellipse cx="200" cy="160" rx="200" ry="60" fill="url(#g4)"/>
+    <rect x="60" y="80" width="280" height="60" rx="1" fill="rgba(255,255,255,0.1)"/>
+    <path d="M60 80 L340 80 L340 75 L60 75Z" fill="rgba(255,255,255,0.12)"/>
+    <ellipse cx="200" cy="72" rx="22" ry="22" fill="rgba(255,255,255,0.12)"/>
+    <ellipse cx="200" cy="72" rx="14" ry="14" fill="rgba(255,255,255,0.12)"/>
+    <rect x="188" y="50" width="24" height="22" rx="1" fill="rgba(255,255,255,0.1)"/>
+    <path d="M188 50 L200 42 L212 50Z" fill="rgba(255,255,255,0.18)"/>
+    ${[80,100,120,280,300,320].map(x=>`<rect x="${x}" y="50" width="6" height="30" rx="1" fill="rgba(255,255,255,0.12)"/><path d="M${x} 50 L${x+3} 44 L${x+6} 50Z" fill="rgba(255,255,255,0.16)"/>`).join('')}
+    <path d="M50 140 Q200 128 350 138" stroke="rgba(100,160,255,0.25)" fill="none" stroke-width="1.5"/>
+    <rect x="50" y="140" width="300" height="30" fill="rgba(100,160,255,0.08)"/>
+    ${[...Array(14)].map((_,i)=>`<circle cx="${20+i*26}" cy="${12+Math.sin(i)*6}" r="0.8" fill="white" opacity="0.3"/>`).join('')}
+  </svg>`,
+  hero_d5: `<svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <defs><radialGradient id="g5" cx="30%" cy="40%"><stop offset="0%" stop-color="rgba(255,180,80,0.3)"/><stop offset="100%" stop-color="rgba(200,50,80,0)"/></radialGradient></defs>
+    <ellipse cx="120" cy="80" rx="100" ry="70" fill="url(#g5)"/>
+    <path d="M250 75 L290 70 L310 80 L290 90 L250 85 Z" fill="rgba(255,255,255,0.2)"/>
+    <path d="M255 80 L280 70 L282 76 Z" fill="rgba(255,255,255,0.15)"/>
+    <path d="M255 80 L280 90 L282 84 Z" fill="rgba(255,255,255,0.15)"/>
+    <rect x="250" y="78" width="20" height="4" rx="2" fill="rgba(255,255,255,0.12)"/>
+    <path d="M20 155 Q60 148 100 152 Q140 156 180 150 Q220 144 260 148 Q300 152 380 145" stroke="rgba(255,255,255,0.12)" fill="none" stroke-width="1"/>
+    ${[50,85,120,160,200,240,280,320,360].map((x,i)=>`<rect x="${x}" y="${145-[15,22,18,25,20,18,22,16,20][i]}" width="4" height="${[15,22,18,25,20,18,22,16,20][i]}" rx="1" fill="rgba(255,255,255,0.1)"/>`).join('')}
+  </svg>`,
+};
+
+// ═══════════════════════════════════════════════
+// PACKING DATA
+// ═══════════════════════════════════════════════
+const PACKING={
+  must:[
+    {cat:'Vêtements',item:'Veste légère'},{cat:'Vêtements',item:'Pulls / manches longues'},
+    {cat:'Vêtements',item:'Chaussures de marche confortables'},{cat:'Vêtements',item:'Écharpe légère'},
+    {cat:'Vêtements',item:'Maillot de bain'},{cat:'Vêtements',item:'Tongs (pour les thermes)'},
+    {cat:'Vêtements',item:'Serviette microfibre'},
+    {cat:'Toilette',item:'Brosse à dents & dentifrice'},{cat:'Toilette',item:'Shampoing & gel douche'},
+    {cat:'Toilette',item:'Crème hydratante'},{cat:'Toilette',item:'Crème solaire'},
+    {cat:'Toilette',item:'Déodorant'},{cat:'Toilette',item:'Brosse à cheveux'},
+    {cat:'Thermes',item:'Housse étanche téléphone'},{cat:'Thermes',item:'Bouteille d\'eau réutilisable'},
+    {cat:'Tech',item:'Téléphone + chargeur'},{cat:'Tech',item:'Batterie portable'},
+    {cat:'Documents',item:'Passeport'},{cat:'Documents',item:'Confirmation de vol'},
+    {cat:'Documents',item:'Assurance voyage'},
+    {cat:'Extras',item:'Petit sac à dos'},{cat:'Extras',item:'Lunettes de soleil'},
+    {cat:'Extras',item:'Masque de sommeil'},{cat:'Extras',item:'Bonnet de nuit'},
+    {cat:'Extras',item:'Médicaments (+ ordonnance)'},
   ],
-  nice: [
-    { cat:'Toilette', item:'Rasoir' },
-    { cat:'Toilette', item:'Maquillage' },
-    { cat:'Thermes', item:'Sac plastique pour affaires mouillées' },
-    { cat:'Tech', item:'Écouteurs' },
-    { cat:'Documents', item:'Itinéraire imprimé' },
-    { cat:'Extras', item:'Snacks' },
-    { cat:'Extras', item:'Carnet & stylo' },
-    { cat:'Extras', item:'Livre ou liseuse' },
-    { cat:'Extras', item:'iPad' },
-    { cat:'Extras', item:'Jeu de cartes' },
-    { cat:'Extras', item:'Masques de beauté' },
+  nice:[
+    {cat:'Toilette',item:'Rasoir'},{cat:'Toilette',item:'Maquillage'},
+    {cat:'Thermes',item:'Sac plastique pour affaires mouillées'},
+    {cat:'Tech',item:'Écouteurs'},{cat:'Documents',item:'Itinéraire imprimé'},
+    {cat:'Extras',item:'Snacks'},{cat:'Extras',item:'Carnet & stylo'},
+    {cat:'Extras',item:'Livre ou liseuse'},{cat:'Extras',item:'iPad'},
+    {cat:'Extras',item:'Jeu de cartes'},{cat:'Extras',item:'Masques de beauté'},
   ]
 };
 
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
 // STATE
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+let currentPerson=null, currentScreen='today', currentPackSection='must', currentDayIdx=0;
 
-let currentPerson = null;
-let currentScreen = 'today';
-let currentPackSection = 'must';
-let currentDayIndex = 0;
-
-function getTodayDayIndex() {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  for (let i = 0; i < DAYS.length; i++) {
-    const d = new Date(DAYS[i].date);
-    if (today.getTime() === d.getTime()) return i;
-  }
-  return -1; // before or after trip
+function getTripStatus(){
+  const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const s=new Date(2026,3,20),e=new Date(2026,3,24);
+  if(today<s)return'before'; if(today>e)return'after'; return'during';
+}
+function getTodayIdx(){
+  const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+  return DAYS.findIndex(d=>new Date(d.date).getTime()===today);
+}
+function getDaysLeft(){
+  const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  return Math.round((new Date(2026,3,20)-today)/(864e5));
 }
 
-function getTripStatus() {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const start = new Date(TRIP_START.getFullYear(), TRIP_START.getMonth(), TRIP_START.getDate());
-  const end   = new Date(TRIP_END.getFullYear(), TRIP_END.getMonth(), TRIP_END.getDate());
-  if (today < start) return 'before';
-  if (today > end)   return 'after';
-  return 'during';
-}
-
-function getDaysUntil() {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const start = new Date(TRIP_START.getFullYear(), TRIP_START.getMonth(), TRIP_START.getDate());
-  return Math.round((start - today) / (1000*60*60*24));
-}
-
-// ─────────────────────────────────────────────
-// PERSON / ONBOARDING
-// ─────────────────────────────────────────────
-
-function setPerson(name) {
-  currentPerson = name;
-  localStorage.setItem('budapest_person', name);
-  document.getElementById('onboarding').classList.add('hidden');
-  document.getElementById('avatar-btn').textContent = name[0];
+// ═══════════════════════════════════════════════
+// PERSON
+// ═══════════════════════════════════════════════
+function setPerson(name){
+  currentPerson=name;
+  localStorage.setItem('bp26_person',name);
+  const ob=document.getElementById('onboarding');
+  ob.classList.add('out');
+  setTimeout(()=>ob.classList.add('hidden'),420);
+  document.getElementById('avatar').textContent=name[0];
+  document.getElementById('ob-p').textContent=t('date_sub')+'\n'+t('qui');
   renderAll();
 }
-
-function resetPerson() {
-  if (confirm('Changer de personne ?')) {
-    currentPerson = null;
-    localStorage.removeItem('budapest_person');
-    document.getElementById('onboarding').classList.remove('hidden');
-    document.getElementById('avatar-btn').textContent = '?';
+function resetPerson(){
+  if(confirm(t('qui')+' ?')){
+    currentPerson=null;localStorage.removeItem('bp26_person');
+    document.getElementById('avatar').textContent='?';
+    document.getElementById('onboarding').classList.remove('hidden','out');
   }
 }
-
-function initPerson() {
-  const saved = localStorage.getItem('budapest_person');
-  if (saved) {
-    currentPerson = saved;
-    document.getElementById('onboarding').classList.add('hidden');
-    document.getElementById('avatar-btn').textContent = saved[0];
-  }
+function initPerson(){
+  const s=localStorage.getItem('bp26_person');
+  if(s){currentPerson=s;document.getElementById('onboarding').classList.add('hidden');document.getElementById('avatar').textContent=s[0];}
 }
 
-// ─────────────────────────────────────────────
-// NAVIGATION
-// ─────────────────────────────────────────────
-
-function goTo(screen) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('screen-' + screen).classList.add('active');
-  document.getElementById('nav-' + screen).classList.add('active');
-  currentScreen = screen;
-  updateHeader(screen);
+// ═══════════════════════════════════════════════
+// NAVIGATION (with transitions)
+// ═══════════════════════════════════════════════
+function goTo(screen){
+  if(screen===currentScreen)return;
+  const old=document.getElementById('screen-'+currentScreen);
+  const next=document.getElementById('screen-'+screen);
+  old.classList.add('exit');
+  old.classList.remove('active');
+  setTimeout(()=>{
+    old.classList.remove('exit');
+    next.classList.add('active');
+    next.scrollTo(0,0);
+  },160);
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nb-'+screen).classList.add('active');
+  currentScreen=screen;
+  updateHeader();
+}
+function updateHeader(){
+  const titles={today:'Budapest 🇭🇺',itinerary:t('itin'),packing:t('pack'),info:t('info')};
+  const subs={today:'20–24 avril 2026',itinerary:t('days_sub'),packing:currentPerson?t('pack_sub')+' '+currentPerson:'',info:'Transport · Phrases · Shopping'};
+  document.getElementById('hdr-title').textContent=titles[currentScreen]||'Budapest 🇭🇺';
+  document.getElementById('hdr-sub').textContent=subs[currentScreen]||'';
+  // update nav labels
+  document.getElementById('nb-today-lbl').textContent=t('today');
+  document.getElementById('nb-itin-lbl').textContent=t('itin');
+  document.getElementById('nb-pack-lbl').textContent=t('pack');
+  document.getElementById('nb-info-lbl').textContent=t('info');
 }
 
-function updateHeader(screen) {
-  const titles = { today: 'Budapest 🇭🇺', itinerary: 'Itinéraire', packing: 'Valise', info: 'Infos' };
-  const subs   = { today: '20–24 avril 2026', itinerary: '5 jours · 4 nuits', packing: currentPerson ? `Checklist de ${currentPerson}` : 'Checklist', info: 'Transport · Phrases · Shopping' };
-  document.getElementById('header-title').textContent = titles[screen] || 'Budapest 🇭🇺';
-  document.getElementById('header-sub').textContent = subs[screen] || '';
+// ═══════════════════════════════════════════════
+// ROW RENDER
+// ═══════════════════════════════════════════════
+const TAGMAP={d:'tag-d',l:'tag-l',b:'tag-b',r:'tag-r'};
+const TAGLBL={d:()=>t('td'),l:()=>t('tl'),b:()=>t('tb'),r:()=>t('tr')};
+function renderRow(row,showArrow){
+  const tags=(row.tags||[]).map(k=>`<span class="tag ${TAGMAP[k]}">${TAGLBL[k]()}</span>`).join('');
+  const tagSpan=tags?`<span class="tags">${tags}</span>`:'';
+  const arrow=row.det?`<span class="row-arrow">›</span>`:'';
+  const name=row.l?`<a href="${row.l}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${row.n}</a>${tagSpan}`:`${row.n}${tagSpan}`;
+  const detail=row.d?`<div class="rd">${row.d}</div>`:'';
+  const clickAttr=row.det?`onclick="openDetail('${row.det.replace(/'/g,"\\'")}')"`:'';
+  return `<div class="row${row.det?' tappable':''}" ${clickAttr}><div class="rt">${row.t}</div><div class="rb"><div class="rn">${name}</div>${detail}</div>${arrow}</div>`;
+}
+function renderDayCards(day){
+  const seenTitles=new Set();
+  return day.sections.map(sec=>{
+    const key=sec.title_key+sec.suffix;
+    if(seenTitles.has(key))return'';
+    seenTitles.add(key);
+    const allRows=day.sections.filter(s=>s.title_key+s.suffix===key).flatMap(s=>s.rows);
+    const hdr=`${t(sec.title_key)}${sec.suffix?' · '+sec.suffix:''}`;
+    return `<div class="card"><div class="card-hdr">${hdr}</div>${allRows.map(r=>renderRow(r)).join('')}</div>`;
+  }).join('');
 }
 
-// ─────────────────────────────────────────────
-// RENDER HELPERS
-// ─────────────────────────────────────────────
-
-function renderRow(row) {
-  const tags = (row.tags||[]).map(t => `<span class="tag tag-${t}">${t==='dinner'?'Dîner':t==='lunch'?'Déj':t==='baths'?'Termes':'Résa'}</span>`).join('');
-  const tagSpan = tags ? `<span class="tags">${tags}</span>` : '';
-  const name = row.l
-    ? `<a href="${row.l}" target="_blank" rel="noopener">${row.n}</a>${tagSpan}`
-    : `${row.n}${tagSpan}`;
-  const detail = row.d ? `<div class="row-detail">${row.d}</div>` : '';
-  return `<div class="row"><div class="row-time">${row.t}</div><div class="row-body"><div class="row-name">${name}</div>${detail}</div></div>`;
-}
-
-function renderDayCard(day) {
-  return day.sections.map(sec => `
-    <div class="card">
-      <div class="card-header">${sec.title}</div>
-      ${sec.rows.map(renderRow).join('')}
+// ═══════════════════════════════════════════════
+// HERO SVG
+// ═══════════════════════════════════════════════
+function renderHero(day,dots){
+  const svg=SVGS['hero_'+day.heroClass]||'';
+  const dotsHtml=dots?`<div class="hero-dots">${DAYS.map((_,i)=>`<div class="dot${i<=getTodayIdx()?'  on':''}"></div>`).join('')}</div>`:'';
+  return `<div class="day-hero ${day.heroClass}">
+    <svg class="bg" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice">${svg}</svg>
+    <div class="hero-content">
+      <div class="hero-date">${day.tab.replace(/\S+ /,'').trim()} — ${t('day')} ${day.num}</div>
+      <div class="hero-title">${day.title}</div>
+      <div class="hero-theme">${day.theme}</div>
+      ${dotsHtml}
     </div>
-  `).join('');
+  </div>`;
 }
 
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
 // TODAY SCREEN
-// ─────────────────────────────────────────────
-
-function renderToday() {
-  const status = getTripStatus();
-  const el = document.getElementById('today-content');
-
-  if (status === 'before') {
-    const d = getDaysUntil();
-    el.innerHTML = `
-      <div class="today-hero">
-        <div class="today-date">Budapest · 20 avril 2026</div>
-        <h1>On y est presque ! ✈️</h1>
-        <div class="today-theme">Préparez vos valises, les filles</div>
+// ═══════════════════════════════════════════════
+function renderToday(){
+  const el=document.getElementById('screen-today');
+  const status=getTripStatus();
+  if(status==='before'){
+    const d=getDaysLeft();
+    el.innerHTML=`<div class="day-hero hero-pre">
+      <svg class="bg" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice">
+        ${[...Array(28)].map((_,i)=>`<circle cx="${10+i*14+Math.sin(i*2)*5}" cy="${8+Math.cos(i*1.8)*10}" r="${0.7+Math.sin(i)*0.4}" fill="white" opacity="${0.2+Math.sin(i*0.7)*0.2}"/>`).join('')}
+        <path d="M160 100 L200 70 L240 100 L230 100 L230 150 L170 150 L170 100Z" fill="rgba(255,255,255,0.1)"/>
+        <rect x="185" y="120" width="30" height="30" fill="rgba(255,255,255,0.06)"/>
+        <path d="M160 100 L200 82 L240 100" stroke="rgba(255,255,255,0.15)" fill="none" stroke-width="1.5"/>
+      </svg>
+      <div class="hero-content">
+        <div class="hero-date">Budapest · 20 avril 2026</div>
+        <div class="hero-title">${t('almost')}</div>
+        <div class="hero-theme">${t('almost2')}</div>
       </div>
-      <div class="today-body">
-        <div class="pretrip-card">
-          <h2>Plus que</h2>
-          <div class="countdown">${d} jour${d>1?'s':''}</div>
-          <p>Le voyage commence le <strong>lundi 20 avril</strong>.<br>Ta valise est prête ?</p>
-          <button class="cta-btn" onclick="goTo('packing')">Voir ma checklist 🎒</button>
-        </div>
-        <div style="margin-bottom:8px;font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.07em;">Aperçu du voyage</div>
-        ${DAYS.map((day, i) => `
-          <div class="card" style="cursor:pointer" onclick="goTo('itinerary');setDayTab(${i})">
-            <div class="row">
-              <div class="row-time" style="flex:0 0 40px;font-size:16px">${day.emoji}</div>
-              <div class="row-body">
-                <div class="row-name">${day.label} — ${day.title}</div>
-                <div class="row-detail">${day.theme}</div>
-              </div>
-            </div>
-          </div>
-        `).join('')}
-      </div>`;
-    return;
-  }
-
-  if (status === 'after') {
-    el.innerHTML = `
-      <div class="today-hero">
-        <div class="today-date">Budapest · avril 2026</div>
-        <h1>C'était magique 🥲</h1>
-        <div class="today-theme">Zero regrets (sauf si vous avez sauté les thermes)</div>
-      </div>
-      <div class="today-body">
-        <div class="pretrip-card">
-          <h2>Le voyage est terminé</h2>
-          <p>Budapest restera pour toujours dans nos cœurs.<br>À la prochaine aventure !</p>
-          <button class="cta-btn" onclick="goTo('itinerary')">Revoir l'itinéraire 📅</button>
-        </div>
-      </div>`;
-    return;
-  }
-
-  // During the trip
-  const idx = getTodayDayIndex();
-  if (idx < 0) return;
-  const day = DAYS[idx];
-  const dots = DAYS.map((d, i) => `<div class="progress-dot${i<=idx?' done':''}"></div>`).join('');
-
-  el.innerHTML = `
-    <div class="today-hero">
-      <div class="today-date">${day.label}</div>
-      <h1>${day.emoji} ${day.title}</h1>
-      <div class="today-theme">${day.theme}</div>
-      <div class="today-progress">${dots}</div>
     </div>
     <div class="today-body">
-      ${renderDayCard(day)}
+      <div class="pretrip">
+        <h2>${t('daysLeft')}</h2>
+        <div class="countdown">${d}<span style="font-size:20px;opacity:.5"> ${t('daysUnit')}${d>1&&t('daysUnit')==='jour'?'s':''}</span></div>
+        <p>${t('start_msg')}<br>${t('pack_ready')}</p>
+        <button class="cta" onclick="goTo('packing')">${t('see_pack')}</button>
+      </div>
+      <div class="section-label">${t('overview')}</div>
+      ${DAYS.map((day,i)=>`
+        <div class="card" style="cursor:pointer" onclick="goTo('itinerary');setDayTab(${i})">
+          <div class="row"><div class="rt" style="flex:0 0 34px;font-size:18px">${day.tab.split(' ')[0]}</div>
+          <div class="rb"><div class="rn">${day.tab.split(' ').slice(1).join(' ')} — ${day.title}</div>
+          <div class="rd">${day.theme}</div></div><span class="row-arrow">›</span></div>
+        </div>`).join('')}
     </div>`;
-}
-
-// ─────────────────────────────────────────────
-// ITINERARY SCREEN
-// ─────────────────────────────────────────────
-
-function renderItinerary() {
-  const tabs = document.getElementById('day-tabs');
-  const panels = document.getElementById('day-panels');
-  tabs.innerHTML = DAYS.map((d, i) => `<button class="day-tab${i===0?' active':''}" id="tab-${i}" onclick="setDayTab(${i})">${d.emoji} ${d.label}</button>`).join('');
-  panels.innerHTML = DAYS.map((d, i) => `
-    <div class="day-content${i===0?' active':''}" id="panel-${i}">
-      <div class="day-intro">
-        <span class="pill">Jour ${d.num}</span>
-        <h2>${d.emoji} ${d.title}</h2>
-        <p>${d.theme}</p>
-      </div>
-      ${renderDayCard(d)}
-    </div>
-  `).join('');
-}
-
-function setDayTab(i) {
-  document.querySelectorAll('.day-tab').forEach((t,j) => t.classList.toggle('active', j===i));
-  document.querySelectorAll('.day-content').forEach((p,j) => p.classList.toggle('active', j===i));
-  document.getElementById('screen-itinerary').scrollTo(0, 0);
-}
-
-// ─────────────────────────────────────────────
-// PACKING SCREEN
-// ─────────────────────────────────────────────
-
-function packKey(person, section, item) {
-  return `pack_${person}_${section}_${item.replace(/\s+/g,'_')}`;
-}
-
-function isChecked(item) {
-  if (!currentPerson) return false;
-  return localStorage.getItem(packKey(currentPerson, currentPackSection, item)) === '1';
-}
-
-function togglePack(item) {
-  if (!currentPerson) return;
-  const key = packKey(currentPerson, currentPackSection, item);
-  const val = localStorage.getItem(key) === '1' ? '0' : '1';
-  localStorage.setItem(key, val);
-  renderPacking();
-}
-
-function setPackSection(section) {
-  currentPackSection = section;
-  document.querySelectorAll('.packing-tab').forEach(t => {
-    t.classList.toggle('active', t.getAttribute('onclick').includes(`'${section}'`));
-  });
-  renderPacking();
-}
-
-function renderPacking() {
-  const items = PACKING[currentPackSection];
-  const checkedCount = items.filter(x => isChecked(x.item)).length;
-  const pct = items.length ? Math.round(checkedCount / items.length * 100) : 0;
-  document.getElementById('pack-progress-fill').style.width = pct + '%';
-  document.getElementById('pack-progress-text').textContent = `${checkedCount} / ${items.length}`;
-
-  // Group by category
-  const byCat = {};
-  items.forEach(x => { (byCat[x.cat] = byCat[x.cat]||[]).push(x); });
-
-  document.getElementById('packing-body').innerHTML = Object.entries(byCat).map(([cat, catItems]) => `
-    <div class="packing-section">
-      <div class="packing-section-title">${cat}</div>
-      <div class="packing-card">
-        ${catItems.map(x => {
-          const checked = isChecked(x.item);
-          return `<div class="pack-item${checked?' checked':''}" onclick="togglePack('${x.item.replace(/'/g,"\\'")}')">
-            <div class="pack-checkbox"></div>
-            <div class="item-name">${x.item}</div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-  `).join('');
-
-  // Update header sub
-  if (currentScreen === 'packing') {
-    document.getElementById('header-sub').textContent = currentPerson ? `Checklist de ${currentPerson}` : 'Checklist';
+    return;
   }
+  if(status==='after'){
+    el.innerHTML=`<div class="day-hero hero-d5"><div class="hero-content">
+      <div class="hero-date">Budapest · avril 2026</div>
+      <div class="hero-title">${t('magic')}</div>
+      <div class="hero-theme">${t('magic2')}</div>
+    </div></div>
+    <div class="today-body">
+      <div class="pretrip">
+        <h2>${t('magic')}</h2><p>${t('magic2')}</p>
+        <button class="cta" onclick="goTo('itinerary')">${t('see_itin')}</button>
+      </div>
+    </div>`;
+    return;
+  }
+  const idx=getTodayIdx(); if(idx<0)return;
+  const day=DAYS[idx];
+  el.innerHTML=`${renderHero(day,true)}<div class="today-body">${renderDayCards(day)}</div>`;
 }
 
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+// ITINERARY SCREEN
+// ═══════════════════════════════════════════════
+function renderItinerary(){
+  const el=document.getElementById('screen-itinerary');
+  const tabs=DAYS.map((d,i)=>`<button class="day-tab${i===0?' active':''}" id="dtab-${i}" onclick="setDayTab(${i})">${d.tab}</button>`).join('');
+  const panels=DAYS.map((d,i)=>`
+    <div class="day-panel${i===0?' active':''}" id="dpanel-${i}">
+      ${renderHero(d,false)}
+      <div style="padding:14px">
+        <div class="day-intro"><span class="pill">${t('day')} ${d.num}</span>
+        <h2>${d.title}</h2><p>${d.theme}</p></div>
+        ${renderDayCards(d)}
+      </div>
+    </div>`).join('');
+  el.innerHTML=`<div class="day-tabs">${tabs}</div><div>${panels}</div>`;
+}
+function setDayTab(i){
+  document.querySelectorAll('.day-tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.day-panel').forEach((p,j)=>p.classList.toggle('active',j===i));
+  document.getElementById('screen-itinerary').scrollTo(0,0);
+}
+
+// ═══════════════════════════════════════════════
+// PACKING SCREEN
+// ═══════════════════════════════════════════════
+function pkKey(item){return`bp26_${currentPerson}_${currentPackSection}_${item.replace(/\W+/g,'_')}`}
+function isChk(item){return localStorage.getItem(pkKey(item))==='1'}
+function togglePk(item){
+  const k=pkKey(item),v=localStorage.getItem(k)==='1'?'0':'1';
+  localStorage.setItem(k,v);
+  const el=document.querySelector(`[data-item="${CSS.escape(item)}"]`);
+  if(el){el.classList.toggle('checked',v==='1');updatePackProgress();}
+}
+function updatePackProgress(){
+  const items=PACKING[currentPackSection];
+  const cnt=items.filter(x=>isChk(x.item)).length;
+  document.getElementById('prog-fill').style.width=Math.round(cnt/items.length*100)+'%';
+  document.getElementById('prog-txt').textContent=`${cnt} / ${items.length}`;
+}
+function renderPacking(){
+  const el=document.getElementById('screen-packing');
+  const byCat={};
+  PACKING[currentPackSection].forEach(x=>(byCat[x.cat]=byCat[x.cat]||[]).push(x));
+  el.innerHTML=`
+    <div class="pack-hdr">
+      <div class="pack-type-tabs">
+        <button class="ptab${currentPackSection==='must'?' active':''}" onclick="switchPackSection('must')">${t('must')}</button>
+        <button class="ptab${currentPackSection==='nice'?' active':''}" onclick="switchPackSection('nice')">${t('nice')}</button>
+      </div>
+      <div class="prog-bar-wrap">
+        <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+        <span class="prog-txt" id="prog-txt"></span>
+      </div>
+    </div>
+    <div class="pack-body">
+      ${Object.entries(byCat).map(([cat,items])=>`
+        <div class="cat-label">${cat}</div>
+        <div class="pack-card">
+          ${items.map(x=>`<div class="pi${isChk(x.item)?' checked':''}" data-item="${x.item.replace(/"/g,'&quot;')}" onclick="togglePk('${x.item.replace(/'/g,"\\'")}')">
+            <div class="pi-check"><div class="pi-tick"></div></div>
+            <div class="pi-name">${x.item}</div>
+          </div>`).join('')}
+        </div>`).join('')}
+    </div>`;
+  updatePackProgress();
+}
+function switchPackSection(s){currentPackSection=s;renderPacking();}
+
+// ═══════════════════════════════════════════════
 // INFO SCREEN
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+function renderInfo(){
+  document.getElementById('screen-info').innerHTML=`<div class="info-body">
+    <div class="ic"><div class="ic-hdr open" onclick="toggleIc(this)">🚌 Transport <span class="chev">▾</span></div>
+    <div class="ic-body open">
+      <div class="callout cg">🎟 <strong>Meilleure option : Pass 7 jours · 6 000 HUF (~15€)</strong><br>Couvre bus, trams et métros BKK.</div>
+      <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin:12px 0 4px">Hors-pass</div>
+      <div class="ir"><span>Bus 100E aéroport (Aurélie & Manon)</span><span class="iv">600 HUF</span></div>
+      <div class="ir"><span>Funiculaire Sikló</span><span class="iv">~3 200 HUF</span></div>
+      <div class="ir"><span>Train MÁV A/R Székesfehérvár</span><span class="iv">~6–8€/pers</span></div>
+      <div class="ir"><span>Taxi gare → Bory Castle</span><span class="iv">~1 500 HUF</span></div>
+      <div class="callout cb" style="margin-top:10px">📱 App recommandée : <strong>Budapest Go</strong> · VTC : <strong>Bolt</strong> (mieux que les taxis)</div>
+    </div></div>
 
-function renderInfo() {
-  document.getElementById('info-body').innerHTML = `
+    <div class="ic"><div class="ic-hdr" onclick="toggleIc(this)">💶 Budget estimé <span class="chev">▾</span></div>
+    <div class="ic-body">
+      <div class="ir"><span>Jour 1</span><span class="iv">€35–65</span></div>
+      <div class="ir"><span>Jour 2</span><span class="iv">€45–65</span></div>
+      <div class="ir"><span>Jour 3</span><span class="iv">€25–35</span></div>
+      <div class="ir"><span>Jour 4</span><span class="iv">€65–90</span></div>
+      <div class="ir"><span style="font-weight:700">Total activités</span><span class="iv" style="font-size:17px">~€170–255</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">* Hors vols · Airbnb · achats perso</div>
+    </div></div>
 
-    <!-- TRANSPORT -->
-    <div class="info-card">
-      <div class="info-card-header" onclick="toggleInfo(this)">
-        🚌 Transport <span style="margin-left:auto;color:var(--muted);font-size:13px">▾</span>
-      </div>
-      <div class="info-card-body">
-        <div class="callout green">🎟 <strong>Meilleure option : Pass 7 jours · 6 000 HUF (~15€)</strong><br>Couvre tous les bus, trams et métros BKK.</div>
-        <div style="font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin:12px 0 6px">Hors-pass (pour toutes)</div>
-        <div class="info-row"><span>Bus 100E aéroport (A&M seulement)</span><span class="val">600 HUF</span></div>
-        <div class="info-row"><span>Funiculaire Sikló</span><span class="val">~3 200 HUF</span></div>
-        <div class="info-row"><span>Train MÁV A/R Székesfehérvár</span><span class="val">~6–8€/pers</span></div>
-        <div class="info-row"><span>Taxi gare → Bory Castle</span><span class="val">~1 500 HUF partagé</span></div>
-        <div style="margin-top:12px;font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">Conseils</div>
-        <div class="info-row"><span>App recommandée</span><span class="val">Budapest Go</span></div>
-        <div class="info-row"><span>VTC recommandé</span><span class="val">Bolt (> taxis)</span></div>
-        <div class="info-row"><span>Vélos en libre-service</span><span class="val">MOL Bubi</span></div>
-      </div>
-    </div>
+    <div class="ic"><div class="ic-hdr" onclick="toggleIc(this)">📞 Réservations <span class="chev">▾</span></div>
+    <div class="ic-body">
+      <div class="callout cy" style="margin-bottom:10px">⚠️ Ces 3 restos nécessitent une réservation à l'avance.</div>
+      <div class="ir"><span>Twentysix Budapest</span><span class="iv">Lundi soir</span></div>
+      <div class="ir"><span>Kádár Étkezde</span><span class="iv">Mardi midi</span></div>
+      <div class="ir"><span>Mazel Tov 🎂</span><span class="iv">Jeudi soir</span></div>
+    </div></div>
 
-    <!-- BUDGET -->
-    <div class="info-card">
-      <div class="info-card-header" onclick="toggleInfo(this)">
-        💶 Budget estimé <span style="margin-left:auto;color:var(--muted);font-size:13px">▾</span>
-      </div>
-      <div class="info-card-body">
-        <div class="info-row"><span>Jour 1</span><span class="val">€35–65</span></div>
-        <div class="info-row"><span>Jour 2</span><span class="val">€45–65</span></div>
-        <div class="info-row"><span>Jour 3</span><span class="val">€25–35</span></div>
-        <div class="info-row"><span>Jour 4</span><span class="val">€65–90</span></div>
-        <div class="info-row"><span style="font-weight:700">Total activités</span><span class="val" style="font-size:16px">~€170–255</span></div>
-        <div style="font-size:11px;color:var(--muted);margin-top:8px">* Hors vols · Airbnb · achats perso</div>
-      </div>
-    </div>
+    <div class="ic"><div class="ic-hdr" onclick="toggleIc(this)">🇭🇺 Parler hongrois <span class="chev">▾</span></div>
+    <div class="ic-body">
+      <div class="callout cb" style="margin-bottom:10px">Budapest se prononce <strong>BoudaPESCHT</strong></div>
+      ${[['Bonjour','Helló','heh-loh'],['Au revoir','Sziasztok!','see-as-tok'],["S'il vous plaît",'Kérem','kay-rem'],['Merci','Köszönöm','Ke ce neum'],['Excusez-moi','Elnézést','el-neh-zesht'],['Combien ?','Mennyibe kerül?','men-yee-be keh-rool'],['Toilettes ?','Hol van a fürdőszoba?','Hol van a fourdesoba'],['Je ne comprends pas','Nem értem','nem air-tem'],['C\'était délicieux !','Finom volt!','fee-nom volt'],['Santé !','Egészségedre!','egg-ace-shay-ged-reh']].map(([fr,hu,pr])=>`<div class="phrase"><div class="phr-fr">${fr}</div><div class="phr-hu">${hu}</div><div class="phr-pr">${pr}</div></div>`).join('')}
+    </div></div>
 
-    <!-- HUNGARIAN PHRASES -->
-    <div class="info-card">
-      <div class="info-card-header" onclick="toggleInfo(this)">
-        🇭🇺 Parler hongrois <span style="margin-left:auto;color:var(--muted);font-size:13px">▾</span>
-      </div>
-      <div class="info-card-body">
-        <div class="callout" style="margin-bottom:12px">Budapest se prononce <strong>BoudaPESCHT</strong> — Natacha avait raison !</div>
-        ${[
-          ['Bonjour','Helló','heh-loh'],
-          ['Au revoir','Sziasztok!','see-as-tok'],
-          ['Oui / Non','Igen / Nem','ee-gen / nem'],
-          ['S\'il vous plaît','Kérem','kay-rem'],
-          ['Merci','Köszönöm','Ke ce neum'],
-          ['Excusez-moi','Elnézést','el-neh-zesht'],
-          ['Combien ça coûte ?','Mennyibe kerül?','men-yee-be keh-rool'],
-          ['Où sont les toilettes ?','Hol van a fürdőszoba?','Hol van a fourdesoba'],
-          ['Je ne comprends pas','Nem értem','nem air-tem'],
-          ['C\'était délicieux !','Finom volt!','fee-nom volt'],
-          ['Santé !','Egészségedre!','egg-ace-shay-ged-reh'],
-        ].map(([fr,hu,pron]) => `
-          <div class="phrase-row">
-            <div class="phrase-fr">${fr}</div>
-            <div class="phrase-hu">${hu}</div>
-            <div class="phrase-pron">${pron}</div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
+    <div class="ic"><div class="ic-hdr" onclick="toggleIc(this)">🛍️ Shopping <span class="chev">▾</span></div>
+    <div class="ic-body">
+      <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">À rapporter</div>
+      ${['Vin Tokaji','Paprika','Pálinka (eau-de-vie)','Œufs peints','Broderies hongroises','Chocolat Stuhmer','Poupées hongroises'].map(i=>`<div class="ir"><span>${i}</span></div>`).join('')}
+      <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin:12px 0 8px">Meilleurs endroits</div>
+      <div class="ir"><span>Grand Marché Central (1er étage)</span><span class="iv">Jour 4</span></div>
+      <div class="ir"><span>Memories of Hungary</span><span class="iv">Centre-ville</span></div>
+    </div></div>
 
-    <!-- SHOPPING -->
-    <div class="info-card">
-      <div class="info-card-header" onclick="toggleInfo(this)">
-        🛍️ Shopping <span style="margin-left:auto;color:var(--muted);font-size:13px">▾</span>
-      </div>
-      <div class="info-card-body">
-        <div style="font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Meilleurs endroits</div>
-        <div class="info-row"><span>Grand Marché (1er étage)</span><span class="val">Jour 4</span></div>
-        <div class="info-row"><span>Memories of Hungary</span><span class="val">Centre ville</span></div>
-        <div class="info-row"><span>Paprika Market</span><span class="val">En ligne aussi</span></div>
-        <div style="font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin:12px 0 8px">Quoi acheter</div>
-        ${['Vin Tokaji','Paprika','Pálinka','Œufs peints','Broderies','Chocolat Stuhmer','Poupées hongroises'].map(i=>`<div class="info-row"><span>${i}</span></div>`).join('')}
-      </div>
-    </div>
-
-    <!-- RÉSERVATIONS -->
-    <div class="info-card">
-      <div class="info-card-header" onclick="toggleInfo(this)">
-        📞 Réservations à faire <span style="margin-left:auto;color:var(--muted);font-size:13px">▾</span>
-      </div>
-      <div class="info-card-body">
-        <div class="callout" style="background:#fff8e8;color:#9a6100;margin-bottom:12px">⚠️ Ces trois restos demandent une réservation à l'avance.</div>
-        <div class="info-row"><span>Twentysix Budapest</span><span class="val">Lundi soir</span></div>
-        <div class="info-row"><span>Kádár Étkezde</span><span class="val">Mardi midi</span></div>
-        <div class="info-row"><span>Mazel Tov 🎂</span><span class="val">Jeudi soir</span></div>
-      </div>
-    </div>
-
-    <!-- AIRBNB -->
-    <div class="info-card">
-      <div class="info-card-header" onclick="toggleInfo(this)">
-        🏠 Airbnb <span style="margin-left:auto;color:var(--muted);font-size:13px">▾</span>
-      </div>
-      <div class="info-card-body">
-        <div class="info-row"><span>Adresse</span><span class="val">Ferenc körút 34</span></div>
-        <div class="info-row"><span>Arrondissement</span><span class="val">District IX</span></div>
-        <div class="info-row"><span>Check-in</span><span class="val">Lun 20 · 15:00</span></div>
-        <div class="info-row"><span>Check-out</span><span class="val">Ven 24 · matin</span></div>
-      </div>
-    </div>
-  `;
+    <div class="ic"><div class="ic-hdr" onclick="toggleIc(this)">🏠 Airbnb <span class="chev">▾</span></div>
+    <div class="ic-body">
+      <div class="ir"><span>Adresse</span><span class="iv">Ferenc körút 34</span></div>
+      <div class="ir"><span>Arrondissement</span><span class="iv">District IX</span></div>
+      <div class="ir"><span>Check-in</span><span class="iv">Lun 20 · 15:00</span></div>
+      <div class="ir"><span>Check-out</span><span class="iv">Ven 24 · matin</span></div>
+    </div></div>
+  </div>`;
+}
+function toggleIc(hdr){
+  hdr.classList.toggle('open');
+  hdr.nextElementSibling.classList.toggle('open');
 }
 
-function toggleInfo(header) {
-  const body = header.nextElementSibling;
-  body.classList.toggle('open');
+// ═══════════════════════════════════════════════
+// DETAIL SHEET
+// ═══════════════════════════════════════════════
+function openDetail(key){
+  const d=DETAILS[key]; if(!d)return;
+  const back=document.getElementById('det-back');
+  const sheet=document.getElementById('det-sheet');
+  const typeLabels={walking:'Tour',landmark:'Monument',baths:'Thermes',cafe:'Café',bar:'Bar',park:'Parc',market:'Marché',memorial:'Mémorial',cruise:'Croisière',hidden:'Gem caché',viewpoint:'Point de vue','day-trip':'Excursion'};
+  let html=`<div class="ds-handle"></div>
+  <div class="ds-head">
+    <div class="ds-type">${typeLabels[d.type]||d.type}</div>
+    <div class="ds-title">${key}</div>
+    <div class="ds-desc">${d.desc}</div>
+  </div>`;
+  if(d.stops){
+    html+=`<div class="ds-section"><div class="ds-section-title">${t('stops')}</div>
+    <div class="stop-list">${d.stops.map((s,i)=>`<div class="stop"><div class="stop-num">${i+1}</div><div class="stop-body"><div class="stop-name">${s.n}</div><div class="stop-detail">${s.d}</div></div></div>`).join('')}</div></div>`;
+  }
+  if(d.facts){
+    html+=`<div class="ds-section"><div class="ds-section-title">${t('facts')}</div>
+    <ul class="fact-list">${d.facts.map(f=>`<li>${f}</li>`).join('')}</ul></div>`;
+  }
+  if(d.practical){
+    html+=`<div class="ds-section"><div class="ds-section-title">${t('practical')}</div>
+    <div class="prac-grid">${Object.entries(d.practical).map(([k,v])=>`<div class="prac-item"><div class="prac-label">${k}</div><div class="prac-val">${v}</div></div>`).join('')}</div></div>`;
+  }
+  if(d.map){
+    html+=`<a href="${d.map}" target="_blank" class="ds-map-btn">${t('open_maps')}</a>`;
+  }
+  document.getElementById('det-content').innerHTML=html;
+  back.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>sheet.classList.add('show')));
+}
+function closeDetail(){
+  document.getElementById('det-back').classList.remove('show');
+  document.getElementById('det-sheet').classList.remove('show');
 }
 
-// ─────────────────────────────────────────────
-// RENDER ALL
-// ─────────────────────────────────────────────
-
-function renderAll() {
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+function renderAll(){
   renderToday();
   renderItinerary();
   renderPacking();
   renderInfo();
-  updateHeader(currentScreen);
+  updateHeader();
 }
-
-// ─────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────
-
 initPerson();
 renderAll();
-if (currentPerson) renderAll(); // ensure packing is rendered with person
-
 </script>
 </body>
 </html>
