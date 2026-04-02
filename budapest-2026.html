@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🇭🇺 Budapest · April 2026</title>
+  <style>
+    :root {
+      --bg: #F8F5F0;
+      --white: #FFFFFF;
+      --text: #1C1C1C;
+      --muted: #888;
+      --red: #C41230;
+      --green: #2A5C34;
+      --gold: #C8922A;
+      --border: #E8E2DA;
+      --shadow: 0 2px 16px rgba(0,0,0,0.07);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(160deg, #1a0810 0%, #4a1020 45%, #152a18 100%);
+      color: white;
+      padding: 56px 24px 44px;
+      text-align: center;
+    }
+    .hero-flag { font-size: 52px; margin-bottom: 14px; display: block; }
+    .hero h1 {
+      font-size: clamp(26px, 8vw, 46px);
+      font-weight: 200;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .hero-sub { font-size: 15px; opacity: 0.75; margin-bottom: 6px; }
+    .hero-names { font-size: 13px; opacity: 0.5; letter-spacing: 0.08em; }
+
+    /* ── NAV ── */
+    .day-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .day-nav::-webkit-scrollbar { display: none; }
+    .day-nav a {
+      flex: 0 0 auto;
+      padding: 13px 18px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 12.5px;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .day-nav a:hover { color: var(--red); border-bottom-color: var(--red); }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 660px; margin: 0 auto; padding: 0 16px; }
+
+    /* ── DAY SECTION ── */
+    .day { padding: 40px 0 20px; }
+    .day-label {
+      display: inline-block;
+      background: var(--red);
+      color: white;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+    .day-title { font-size: 21px; font-weight: 700; margin-bottom: 3px; }
+    .day-theme { font-size: 12.5px; color: var(--muted); font-style: italic; margin-bottom: 20px; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--white);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .card-header {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 11px 16px 10px;
+      background: #FAFAF8;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── ACTIVITY ROW ── */
+    .row {
+      display: flex;
+      padding: 11px 16px;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      align-items: flex-start;
+    }
+    .row:last-child { border-bottom: none; }
+    .row-time {
+      flex: 0 0 48px;
+      font-size: 11.5px;
+      color: var(--muted);
+      padding-top: 2px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.4;
+    }
+    .row-body { flex: 1; min-width: 0; }
+    .row-name {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      line-height: 1.4;
+    }
+    .row-name a {
+      color: var(--text);
+      text-decoration: none;
+      border-bottom: 1.5px solid var(--gold);
+      padding-bottom: 1px;
+      transition: color 0.15s;
+    }
+    .row-name a:hover { color: var(--red); }
+    .row-detail { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    /* ── TAGS ── */
+    .tags { display: inline-flex; gap: 4px; margin-left: 6px; vertical-align: middle; }
+    .tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 8px;
+    }
+    .tag-dinner  { background: #FFF0F2; color: #C41230; }
+    .tag-lunch   { background: #FFF8E8; color: #9A6100; }
+    .tag-baths   { background: #EAF4FF; color: #1255A0; }
+    .tag-book    { background: #EDFBF2; color: #2A5C34; border: 1px solid #A8D5B5; }
+
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: var(--border); margin: 8px 0 0; }
+
+    /* ── BUDGET ── */
+    .budget { padding: 32px 0 52px; }
+    .budget-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+    .budget-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .budget-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+    .budget-day { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+    .budget-amount { font-size: 17px; font-weight: 700; }
+    .budget-total { grid-column: 1 / -1; background: var(--red); color: white; }
+    .budget-total .budget-day { color: rgba(255,255,255,0.65); }
+    .budget-total .budget-amount { color: white; }
+    .budget-note { font-size: 11px; color: var(--muted); margin-top: 10px; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 380px) {
+      .budget-grid { grid-template-columns: 1fr; }
+      .budget-total { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <span class="hero-flag">🇭🇺</span>
+  <h1>Budapest</h1>
+  <div class="hero-sub">April 20 → 24, 2026</div>
+  <div class="hero-names">Aurélie · Manon · Joana</div>
+</header>
+
+<!-- NAV -->
+<nav class="day-nav">
+  <a href="#day1">Mon 20</a>
+  <a href="#day2">Tue 21</a>
+  <a href="#day3">Wed 22</a>
+  <a href="#day4">Thu 23</a>
+  <a href="#day5">Fri 24</a>
+</nav>
+
+<div class="container">
+
+  <!-- ───── DAY 1 ───── -->
+  <section class="day" id="day1">
+    <div class="day-label">Day 1 · Monday</div>
+    <div class="day-title">Arrival + Gellért Hill + Cruise</div>
+    <div class="day-theme">Cinema &amp; Complicity — Reunion &amp; Softness</div>
+
+    <div class="card">
+      <div class="card-header">☀️ Morning — Aurélie &amp; Manon</div>
+      <div class="row">
+        <div class="row-time">08:20</div>
+        <div class="row-body">
+          <div class="row-name">Land at Budapest Airport</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~09:45</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Dorado+Café+Dohány+utca+Budapest">Dorado Café</a></div>
+          <div class="row-detail">Dohány utca 13 · Morning coffee &amp; breakfast</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">10:15</div>
+        <div class="row-body">
+          <div class="row-name">Marvel Walking Tour</div>
+          <div class="row-detail"><a href="https://maps.google.com/?q=Heroes+Square+Budapest">Heroes' Square</a> · <a href="https://maps.google.com/?q=Vajdahunyad+Castle+Budapest">Vajdahunyad Castle</a> · Parliament · Nyugati Station</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~12:30</div>
+        <div class="row-body">
+          <div class="row-name">
+            <a href="https://maps.google.com/?q=Street+Food+Karaván+Kazinczy+Budapest">Street Food Karaván</a>
+            <span class="tags"><span class="tag tag-lunch">Lunch</span></span>
+          </div>
+          <div class="row-detail">Kazinczy u. 18 · Lángos, burgers, 8 food trucks</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">🌇 Afternoon &amp; Evening — All three</div>
+      <div class="row">
+        <div class="row-time">14:00</div>
+        <div class="row-body">
+          <div class="row-name">Joana lands · Check-in Airbnb</div>
+          <div class="row-detail">Ferenc körút 34, District IX</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~17:00</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Gellért+Hill+Budapest">Gellért Hill</a></div>
+          <div class="row-detail">15 min walk from Airbnb · Panoramic views · Citadelle Café at the top</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">19:30</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Silver+Line+Cruise+Budapest">Silver Line Sunset Cruise</a></div>
+          <div class="row-detail">Dock 11, near Elizabeth Bridge · ~70 min · from ~€9/person</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~21:00</div>
+        <div class="row-body">
+          <div class="row-name">
+            <a href="https://maps.google.com/?q=Twentysix+Budapest+Király+u">Twentysix Budapest</a>
+            <span class="tags"><span class="tag tag-dinner">Dinner</span><span class="tag tag-book">Résa</span></span>
+          </div>
+          <div class="row-detail">Király u. 26 · Tropical indoor jungle · Mediterranean</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ───── DAY 2 ───── -->
+  <section class="day" id="day2">
+    <div class="day-label">Day 2 · Tuesday</div>
+    <div class="day-title">Buda Side + Termes</div>
+    <div class="day-theme">Imperial Budapest &amp; Panoramas</div>
+
+    <div class="card">
+      <div class="card-header">🦁 Buda Walking Tour</div>
+      <div class="row">
+        <div class="row-time">~10:00</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Chain+Bridge+Budapest">Chain Bridge</a></div>
+          <div class="row-detail">Cross on foot · views · 10–15 min</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~10:20</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Budavári+Sikló+Budapest">Funicular</a> <em style="font-size:12px;color:var(--muted)">(Budavári Sikló)</em></div>
+          <div class="row-detail">Clark Ádám tér → Castle Hill · ~€8/person</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~10:30</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Buda+Castle+Budapest">Buda Castle &amp; Royal Palace</a></div>
+          <div class="row-detail">Grounds · Matthias Fountain · Turul statue · views over Pest</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~11:30</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Fisherman%27s+Bastion+Budapest">Fisherman's Bastion</a></div>
+          <div class="row-detail">Best panoramic views in Budapest · lower terrace free · upper ~€4</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~12:15</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Matthias+Church+Budapest">Matthias Church</a> <em style="font-size:12px;color:var(--muted)">(exterior)</em></div>
+          <div class="row-detail">Diamond-pattern tiled roof</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~12:35</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Vienna+Gate+Budapest">Vienna Gate</a> <em style="font-size:12px;color:var(--muted)">(Bécsi Kapu)</em></div>
+          <div class="row-detail">Medieval north gate · quiet · great views</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~13:00</div>
+        <div class="row-body">
+          <div class="row-name">
+            <a href="https://maps.google.com/?q=Fekete+Holló+Budapest">Fekete Holló</a>
+            <span class="tags"><span class="tag tag-lunch">Lunch</span></span>
+          </div>
+          <div class="row-detail">Castle District · Medieval vaulted interior · catfish paprikash</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">🛁 Afternoon — Baths</div>
+      <div class="row">
+        <div class="row-time">~14:45</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Gül+Baba+Türbe+Budapest">Gül Baba Garden &amp; Türbe</a></div>
+          <div class="row-detail">Ottoman garden · 5 min walk from Lukács · 15 min</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">15:00</div>
+        <div class="row-body">
+          <div class="row-name">
+            <a href="https://maps.google.com/?q=Lukács+Thermal+Baths+Budapest">Lukács Thermal Baths</a>
+            <span class="tags"><span class="tag tag-baths">Baths</span></span>
+          </div>
+          <div class="row-detail">Frankel Leó út 25-29 · from ~€18 · open until 22:00 on Tuesdays</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">🌙 Evening</div>
+      <div class="row">
+        <div class="row-time">19:30</div>
+        <div class="row-body">
+          <div class="row-name">
+            <a href="https://maps.google.com/?q=Kádár+Étkezde+Budapest">Kádár Étkezde</a>
+            <span class="tags"><span class="tag tag-dinner">Dinner</span><span class="tag tag-book">Résa</span></span>
+          </div>
+          <div class="row-detail">District VII · Communal tables · Chicken paprikás</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">21:00</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=New+York+Kávéház+Budapest">New York Café</a></div>
+          <div class="row-detail">Erzsébet krt. 9-11 · Dobos Torte · Most beautiful café in the world</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">22:00</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Szimpla+Kert+Budapest">Szimpla Kert</a></div>
+          <div class="row-detail">Kazinczy u. 14 · The original ruin bar</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ───── DAY 3 ───── -->
+  <section class="day" id="day3">
+    <div class="day-label">Day 3 · Wednesday</div>
+    <div class="day-title">Bory Castle + Margaret Island</div>
+    <div class="day-theme">Fairytale &amp; Romantic Escape</div>
+
+    <div class="card">
+      <div class="card-header">🚉 Day trip — Székesfehérvár</div>
+      <div class="row">
+        <div class="row-time">~09:30</div>
+        <div class="row-body">
+          <div class="row-name">Train to Székesfehérvár</div>
+          <div class="row-detail">From Kelenföld · direct · ~50 min · ~€3–4/person</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">10:30</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Bory+Castle+Székesfehérvár">Bory Castle</a></div>
+          <div class="row-detail">Máriavölgy u. 54 · Built over 40 years as a love monument · ~€5/person · 2.5h</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~13:30</div>
+        <div class="row-body">
+          <div class="row-name">Lunch on Fő utca
+            <span class="tags"><span class="tag tag-lunch">Lunch</span></span>
+          </div>
+          <div class="row-detail">Cobblestone street · Baroque buildings · TBD on arrival</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~14:30</div>
+        <div class="row-body">
+          <div class="row-name">Train back to Budapest</div>
+          <div class="row-detail">~50 min · arrive Kelenföld ~15:20</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">🌿 Afternoon — <a href="https://maps.google.com/?q=Margaret+Island+Budapest" style="color:var(--text);border-bottom:1.5px solid var(--gold);text-decoration:none;">Margaret Island</a></div>
+      <div class="row">
+        <div class="row-time">~16:00</div>
+        <div class="row-body">
+          <div class="row-name">Musical Fountain · Rose Garden · Ruins · Water Tower · Japanese Garden</div>
+          <div class="row-detail">~2h stroll · full bloom in April</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">🌙 Evening</div>
+      <div class="row">
+        <div class="row-time">19:30</div>
+        <div class="row-body">
+          <div class="row-name">
+            <a href="https://maps.google.com/?q=Salt+Budapest+Királyi+Pál+utca">Salt Budapest</a>
+            <span class="tags"><span class="tag tag-dinner">Dinner</span></span>
+          </div>
+          <div class="row-detail">Királyi Pál utca, District IX · Cosy · Jazz &amp; soul · Modern cuisine</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~21:30</div>
+        <div class="row-body">
+          <div class="row-name">🧖 Self Care Night</div>
+          <div class="row-detail">Face masks · Film + popcorn · Airbnb</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ───── DAY 4 ───── -->
+  <section class="day" id="day4">
+    <div class="day-label">Day 4 · Thursday</div>
+    <div class="day-title">Pest in Full + Rudas + 🎂</div>
+    <div class="day-theme">Culture, Hidden Gems &amp; Birthday Evening</div>
+
+    <div class="card">
+      <div class="card-header">🌅 Morning</div>
+      <div class="row">
+        <div class="row-time">~09:30</div>
+        <div class="row-body">
+          <div class="row-name">Ráday utca — Morning coffee</div>
+          <div class="row-detail">Budapest's café street · 5 min from Airbnb</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~10:10</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Liberty+Bridge+Budapest">Liberty Bridge</a> <em style="font-size:12px;color:var(--muted)">(Szabadság híd)</em></div>
+          <div class="row-detail">Green iron bridge · Turul birds · small markets at Pest foot</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">🛒 Midday — Grand Marché</div>
+      <div class="row">
+        <div class="row-time">11:00</div>
+        <div class="row-body">
+          <div class="row-name">
+            <a href="https://maps.google.com/?q=Great+Market+Hall+Budapest">Grand Marché Central</a>
+            <span class="tags"><span class="tag tag-lunch">Lunch</span></span>
+          </div>
+          <div class="row-detail">Fővám tér 1-3 · Ground floor: paprika, Tokaji, palinka · 1st floor: lángos + chimney cake 🍮</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">🚶 Afternoon — Pest Circuit</div>
+      <div class="row">
+        <div class="row-time">~13:30</div>
+        <div class="row-body">
+          <div class="row-name">Danube Promenade</div>
+          <div class="row-detail">Walk north · views of Buda Castle &amp; all bridges</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~14:00</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Párisi+Udvar+Budapest">Párisi Udvar</a></div>
+          <div class="row-detail">Art Nouveau arcade · stained glass · Zsolnay tiles · hidden gem</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~14:35</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Shoes+on+the+Danube+Budapest">Shoes on the Danube</a></div>
+          <div class="row-detail">Holocaust memorial · 60 iron shoes · quiet and powerful</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~15:10</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Hungarian+Parliament+Budapest">Parliament</a></div>
+          <div class="row-detail">Exterior · Kossuth tér · one of the most impressive buildings in Europe</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~15:35</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=St+Stephen%27s+Basilica+Budapest">St. Stephen's Basilica</a></div>
+          <div class="row-detail">Exterior + interior · optional dome climb (~€8)</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~16:20</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=New+York+Kávéház+Budapest">New York Café</a></div>
+          <div class="row-detail">Dobos Torte + coffee · 30 min</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~16:55</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Ervin+Szabó+Library+Budapest">Ervin Szabó Library</a> 🔍</div>
+          <div class="row-detail">Gold Room · spiral staircase · crystal chandeliers · hidden gem · 30 min</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~17:30</div>
+        <div class="row-body">
+          <div class="row-name"><a href="https://maps.google.com/?q=Dohány+Street+Synagogue+Budapest">Jewish Quarter &amp; Dohány Synagogue</a></div>
+          <div class="row-detail">Street art · exterior + courtyard · ~45 min</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">🛁 Evening — Baths &amp; Birthday Dinner</div>
+      <div class="row">
+        <div class="row-time">18:30</div>
+        <div class="row-body">
+          <div class="row-name">
+            <a href="https://maps.google.com/?q=Rudas+Thermal+Baths+Budapest">Rudas Thermal Baths — Rooftop</a>
+            <span class="tags"><span class="tag tag-baths">Baths</span></span>
+          </div>
+          <div class="row-detail">Döbrentei tér 9 · ~€30/person · rooftop pool · Danube view · sunset ~20:00</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">~20:30</div>
+        <div class="row-body">
+          <div class="row-name">
+            <a href="https://maps.google.com/?q=Mazel+Tov+Budapest">Mazel Tov</a> 🎂
+            <span class="tags"><span class="tag tag-dinner">Dinner</span><span class="tag tag-book">Résa</span></span>
+          </div>
+          <div class="row-detail">Akácfa u. 47 · Fairy lights · Mediterranean-Hungarian · Anniversary dinner</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ───── DAY 5 ───── -->
+  <section class="day" id="day5">
+    <div class="day-label">Day 5 · Friday</div>
+    <div class="day-title">Departure ✈️</div>
+    <div class="day-theme">See you next time, Budapest 🥲</div>
+
+    <div class="card">
+      <div class="row">
+        <div class="row-time">Morning</div>
+        <div class="row-body">
+          <div class="row-name">Breakfast at Airbnb · Pack up</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-time">TBD</div>
+        <div class="row-body">
+          <div class="row-name">Transfer to airport</div>
+          <div class="row-detail">Metro M3 + Bus 200E</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ───── BUDGET ───── -->
+  <section class="budget">
+    <div class="budget-title">💶 Estimated Budget per person</div>
+    <div class="budget-grid">
+      <div class="budget-card">
+        <div class="budget-day">Day 1</div>
+        <div class="budget-amount">€35–65</div>
+      </div>
+      <div class="budget-card">
+        <div class="budget-day">Day 2</div>
+        <div class="budget-amount">€45–65</div>
+      </div>
+      <div class="budget-card">
+        <div class="budget-day">Day 3</div>
+        <div class="budget-amount">€25–35</div>
+      </div>
+      <div class="budget-card">
+        <div class="budget-day">Day 4</div>
+        <div class="budget-amount">€65–90</div>
+      </div>
+      <div class="budget-card budget-total">
+        <div class="budget-day">Total · activities only</div>
+        <div class="budget-amount">~€170–255</div>
+      </div>
+    </div>
+    <div class="budget-note">* Excludes flights · Airbnb · personal shopping</div>
+  </section>
+
+</div>
+
+<footer>🇭🇺 Budapest · April 2026 · Aurélie, Manon &amp; Joana</footer>
+
+</body>
+</html>
