@@ -1,665 +1,927 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🇭🇺 Budapest · April 2026</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#C41230">
+  <title>Budapest 2026 🇭🇺</title>
   <style>
     :root {
-      --bg: #F8F5F0;
-      --white: #FFFFFF;
-      --text: #1C1C1C;
-      --muted: #888;
       --red: #C41230;
+      --red-light: #f8e8eb;
       --green: #2A5C34;
       --gold: #C8922A;
-      --border: #E8E2DA;
-      --shadow: 0 2px 16px rgba(0,0,0,0.07);
+      --bg: #F7F4EF;
+      --card: #fff;
+      --text: #1a1a1a;
+      --muted: #888;
+      --border: #ede8e0;
+      --nav-h: 64px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --radius: 14px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.5;
     }
 
-    /* ── HERO ── */
-    .hero {
-      background: linear-gradient(160deg, #1a0810 0%, #4a1020 45%, #152a18 100%);
-      color: white;
-      padding: 56px 24px 44px;
-      text-align: center;
-    }
-    .hero-flag { font-size: 52px; margin-bottom: 14px; display: block; }
-    .hero h1 {
-      font-size: clamp(26px, 8vw, 46px);
-      font-weight: 200;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-    .hero-sub { font-size: 15px; opacity: 0.75; margin-bottom: 6px; }
-    .hero-names { font-size: 13px; opacity: 0.5; letter-spacing: 0.08em; }
+    /* ── APP SHELL ── */
+    #app { display: flex; flex-direction: column; height: 100dvh; }
 
-    /* ── NAV ── */
-    .day-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: var(--white);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      overflow-x: auto;
+    .screen {
+      flex: 1;
+      overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      display: none;
+      padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 8px);
     }
-    .day-nav::-webkit-scrollbar { display: none; }
-    .day-nav a {
-      flex: 0 0 auto;
-      padding: 13px 18px;
-      text-decoration: none;
-      color: var(--muted);
-      font-size: 12.5px;
-      font-weight: 500;
-      border-bottom: 2px solid transparent;
-      white-space: nowrap;
-      transition: color 0.2s, border-color 0.2s;
+    .screen.active { display: block; }
+
+    /* ── ONBOARDING ── */
+    #onboarding {
+      position: fixed; inset: 0; z-index: 999;
+      background: linear-gradient(160deg, #1a0810 0%, #4a1020 45%, #152a18 100%);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 24px; padding: 32px;
+      text-align: center; color: white;
     }
-    .day-nav a:hover { color: var(--red); border-bottom-color: var(--red); }
-
-    /* ── LAYOUT ── */
-    .container { max-width: 660px; margin: 0 auto; padding: 0 16px; }
-
-    /* ── DAY SECTION ── */
-    .day { padding: 40px 0 20px; }
-    .day-label {
-      display: inline-block;
-      background: var(--red);
-      color: white;
-      font-size: 10.5px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 4px 12px;
-      border-radius: 20px;
-      margin-bottom: 10px;
+    #onboarding h1 { font-size: 36px; font-weight: 200; letter-spacing: 0.15em; text-transform: uppercase; }
+    #onboarding p { font-size: 15px; opacity: 0.7; }
+    #onboarding .flag { font-size: 56px; }
+    .person-btns { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 280px; }
+    .person-btn {
+      padding: 16px; border-radius: 50px; border: 1.5px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.08); color: white;
+      font-size: 16px; font-weight: 500; cursor: pointer;
+      transition: all 0.2s;
     }
-    .day-title { font-size: 21px; font-weight: 700; margin-bottom: 3px; }
-    .day-theme { font-size: 12.5px; color: var(--muted); font-style: italic; margin-bottom: 20px; }
+    .person-btn:hover, .person-btn:active { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.6); }
+    #onboarding.hidden { display: none; }
 
-    /* ── CARD ── */
+    /* ── HEADER ── */
+    .app-header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .app-header h2 { font-size: 17px; font-weight: 700; }
+    .app-header .sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .avatar-btn {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--red); color: white;
+      font-size: 13px; font-weight: 700;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: calc(var(--nav-h) + var(--safe-bottom));
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex; align-items: flex-start;
+      padding-top: 6px;
+      z-index: 100;
+    }
+    .nav-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      gap: 3px; background: none; border: none; cursor: pointer;
+      padding: 4px 0; color: var(--muted); font-size: 10.5px; font-weight: 500;
+      transition: color 0.15s;
+    }
+    .nav-btn .icon { font-size: 22px; line-height: 1; transition: transform 0.15s; }
+    .nav-btn.active { color: var(--red); }
+    .nav-btn.active .icon { transform: scale(1.1); }
+
+    /* ── SHARED COMPONENTS ── */
+    .section-pad { padding: 16px; }
     .card {
-      background: var(--white);
-      border-radius: 14px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      margin-bottom: 14px;
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); overflow: hidden; margin-bottom: 14px;
     }
     .card-header {
-      font-size: 10.5px;
-      font-weight: 700;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: 11px 16px 10px;
-      background: #FAFAF8;
-      border-bottom: 1px solid var(--border);
+      font-size: 10.5px; font-weight: 700; letter-spacing: 0.09em;
+      text-transform: uppercase; color: var(--muted);
+      padding: 10px 14px; background: #fafaf8; border-bottom: 1px solid var(--border);
     }
-
-    /* ── ACTIVITY ROW ── */
     .row {
-      display: flex;
-      padding: 11px 16px;
-      gap: 12px;
-      border-bottom: 1px solid var(--border);
-      align-items: flex-start;
+      display: flex; padding: 11px 14px; gap: 12px;
+      border-bottom: 1px solid var(--border); align-items: flex-start;
     }
     .row:last-child { border-bottom: none; }
     .row-time {
-      flex: 0 0 48px;
-      font-size: 11.5px;
-      color: var(--muted);
-      padding-top: 2px;
-      font-variant-numeric: tabular-nums;
-      line-height: 1.4;
+      flex: 0 0 46px; font-size: 11.5px; color: var(--muted);
+      padding-top: 2px; font-variant-numeric: tabular-nums; line-height: 1.4;
     }
     .row-body { flex: 1; min-width: 0; }
-    .row-name {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 2px;
-      line-height: 1.4;
-    }
+    .row-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; line-height: 1.35; }
     .row-name a {
-      color: var(--text);
-      text-decoration: none;
-      border-bottom: 1.5px solid var(--gold);
-      padding-bottom: 1px;
-      transition: color 0.15s;
+      color: var(--text); text-decoration: none;
+      border-bottom: 1.5px solid var(--gold); padding-bottom: 1px;
     }
-    .row-name a:hover { color: var(--red); }
-    .row-detail { font-size: 12px; color: var(--muted); line-height: 1.5; }
-
-    /* ── TAGS ── */
-    .tags { display: inline-flex; gap: 4px; margin-left: 6px; vertical-align: middle; }
-    .tag {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      padding: 2px 7px;
-      border-radius: 8px;
-    }
-    .tag-dinner  { background: #FFF0F2; color: #C41230; }
-    .tag-lunch   { background: #FFF8E8; color: #9A6100; }
-    .tag-baths   { background: #EAF4FF; color: #1255A0; }
-    .tag-book    { background: #EDFBF2; color: #2A5C34; border: 1px solid #A8D5B5; }
-
-    /* ── DIVIDER ── */
-    .divider { height: 1px; background: var(--border); margin: 8px 0 0; }
-
-    /* ── BUDGET ── */
-    .budget { padding: 32px 0 52px; }
-    .budget-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
-    .budget-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .budget-card {
-      background: var(--white);
-      border-radius: 12px;
-      padding: 14px 16px;
-      box-shadow: var(--shadow);
-    }
-    .budget-day { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
-    .budget-amount { font-size: 17px; font-weight: 700; }
-    .budget-total { grid-column: 1 / -1; background: var(--red); color: white; }
-    .budget-total .budget-day { color: rgba(255,255,255,0.65); }
-    .budget-total .budget-amount { color: white; }
-    .budget-note { font-size: 11px; color: var(--muted); margin-top: 10px; }
-
-    /* ── FOOTER ── */
-    footer {
-      text-align: center;
-      padding: 20px;
-      font-size: 12px;
-      color: var(--muted);
-      border-top: 1px solid var(--border);
+    .row-detail { font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .tags { display: inline-flex; gap: 4px; margin-left: 5px; vertical-align: middle; }
+    .tag { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 6px; border-radius: 7px; }
+    .tag-dinner { background: #fff0f2; color: #c41230; }
+    .tag-lunch  { background: #fff8e8; color: #9a6100; }
+    .tag-baths  { background: #eaf4ff; color: #1255a0; }
+    .tag-book   { background: #edfbf2; color: #2a5c34; border: 1px solid #a8d5b5; }
+    .pill {
+      display: inline-block; background: var(--red); color: white;
+      font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 3px 12px; border-radius: 20px;
     }
 
-    @media (max-width: 380px) {
-      .budget-grid { grid-template-columns: 1fr; }
-      .budget-total { grid-column: 1; }
+    /* ── TODAY SCREEN ── */
+    .today-hero {
+      background: linear-gradient(155deg, #1a0810 0%, #4a1020 50%, #152a18 100%);
+      padding: 28px 20px 24px; color: white; text-align: center;
     }
+    .today-date { font-size: 12px; opacity: 0.6; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+    .today-hero h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .today-theme { font-size: 13px; opacity: 0.7; font-style: italic; }
+    .today-progress {
+      display: flex; gap: 6px; justify-content: center; margin-top: 16px;
+    }
+    .progress-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+    }
+    .progress-dot.done { background: rgba(255,255,255,0.9); }
+    .today-body { padding: 16px; }
+
+    /* pre-trip / post-trip */
+    .pretrip-card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 24px 20px; text-align: center;
+      margin-bottom: 14px;
+    }
+    .pretrip-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .pretrip-card p { font-size: 14px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
+    .pretrip-card .countdown { font-size: 36px; font-weight: 200; color: var(--red); margin: 8px 0; }
+    .cta-btn {
+      display: inline-block; background: var(--red); color: white;
+      padding: 12px 24px; border-radius: 50px; font-size: 14px; font-weight: 600;
+      border: none; cursor: pointer; text-decoration: none;
+    }
+
+    /* ── ITINERARY SCREEN ── */
+    .day-tabs {
+      display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; gap: 0;
+      background: var(--card); border-bottom: 1px solid var(--border);
+      position: sticky; top: 57px; z-index: 40;
+    }
+    .day-tabs::-webkit-scrollbar { display: none; }
+    .day-tab {
+      flex: 0 0 auto; padding: 11px 16px; font-size: 12.5px; font-weight: 500;
+      color: var(--muted); border: none; background: none; cursor: pointer;
+      border-bottom: 2.5px solid transparent; white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .day-tab.active { color: var(--red); border-bottom-color: var(--red); }
+    .day-content { padding: 16px; display: none; }
+    .day-content.active { display: block; }
+    .day-intro { margin-bottom: 16px; }
+    .day-intro h2 { font-size: 20px; font-weight: 700; margin: 6px 0 3px; }
+    .day-intro p { font-size: 13px; color: var(--muted); font-style: italic; }
+
+    /* ── PACKING SCREEN ── */
+    .packing-header {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 12px 16px; position: sticky; top: 57px; z-index: 40;
+    }
+    .packing-tabs {
+      display: flex; gap: 8px;
+    }
+    .packing-tab {
+      flex: 1; padding: 8px; border-radius: 10px; border: 1.5px solid var(--border);
+      background: none; font-size: 13px; font-weight: 500; color: var(--muted);
+      cursor: pointer; transition: all 0.15s; text-align: center;
+    }
+    .packing-tab.active { border-color: var(--red); background: var(--red-light); color: var(--red); }
+    .packing-progress {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 10px;
+    }
+    .progress-bar {
+      flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+    }
+    .progress-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.3s; }
+    .progress-text { font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .packing-body { padding: 16px; }
+    .packing-section { margin-bottom: 8px; }
+    .packing-section-title {
+      font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      padding: 6px 0; margin-bottom: 4px;
+    }
+    .packing-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .pack-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: background 0.1s;
+    }
+    .pack-item:last-child { border-bottom: none; }
+    .pack-item:active { background: #f5f0ea; }
+    .pack-item.checked .item-name { text-decoration: line-through; color: var(--muted); }
+    .pack-checkbox {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid var(--border); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .pack-item.checked .pack-checkbox { background: var(--green); border-color: var(--green); }
+    .pack-checkbox::after { content: ''; display: none; }
+    .pack-item.checked .pack-checkbox::after {
+      display: block; width: 5px; height: 9px;
+      border: 2px solid white; border-top: none; border-left: none;
+      transform: rotate(42deg) translate(-1px, -1px);
+    }
+    .item-name { font-size: 14px; flex: 1; }
+    .item-cat {
+      font-size: 10px; color: var(--muted); background: var(--border);
+      padding: 2px 7px; border-radius: 6px; flex-shrink: 0;
+    }
+
+    /* ── INFO SCREEN ── */
+    .info-body { padding: 16px; }
+    .info-card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); overflow: hidden; margin-bottom: 14px;
+    }
+    .info-card-header {
+      padding: 14px 16px; font-size: 15px; font-weight: 700;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px; cursor: pointer;
+    }
+    .info-card-body { padding: 14px 16px; display: none; }
+    .info-card-body.open { display: block; }
+    .info-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13.5px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .val { font-weight: 600; color: var(--red); }
+    .phrase-row { padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+    .phrase-row:last-child { border-bottom: none; }
+    .phrase-fr { font-weight: 600; margin-bottom: 2px; }
+    .phrase-hu { color: var(--muted); font-style: italic; font-size: 13px; }
+    .phrase-pron { font-size: 11.5px; color: #aaa; }
+    .callout {
+      background: #e8f4ff; border-radius: 10px; padding: 12px 14px;
+      font-size: 13px; line-height: 1.6; margin-bottom: 8px; color: #1255a0;
+    }
+    .callout.green { background: #edfbf2; color: #2a5c34; }
   </style>
 </head>
 <body>
 
-<!-- HERO -->
-<header class="hero">
-  <span class="hero-flag">🇭🇺</span>
+<!-- ONBOARDING -->
+<div id="onboarding">
+  <span class="flag">🇭🇺</span>
   <h1>Budapest</h1>
-  <div class="hero-sub">April 20 → 24, 2026</div>
-  <div class="hero-names">Aurélie · Manon · Joana</div>
-</header>
-
-<!-- NAV -->
-<nav class="day-nav">
-  <a href="#day1">Mon 20</a>
-  <a href="#day2">Tue 21</a>
-  <a href="#day3">Wed 22</a>
-  <a href="#day4">Thu 23</a>
-  <a href="#day5">Fri 24</a>
-</nav>
-
-<div class="container">
-
-  <!-- ───── DAY 1 ───── -->
-  <section class="day" id="day1">
-    <div class="day-label">Day 1 · Monday</div>
-    <div class="day-title">Arrival + Gellért Hill + Cruise</div>
-    <div class="day-theme">Cinema &amp; Complicity — Reunion &amp; Softness</div>
-
-    <div class="card">
-      <div class="card-header">☀️ Morning — Aurélie &amp; Manon</div>
-      <div class="row">
-        <div class="row-time">08:20</div>
-        <div class="row-body">
-          <div class="row-name">Land at Budapest Airport</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~09:45</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Dorado+Café+Dohány+utca+Budapest">Dorado Café</a></div>
-          <div class="row-detail">Dohány utca 13 · Morning coffee &amp; breakfast</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">10:15</div>
-        <div class="row-body">
-          <div class="row-name">Marvel Walking Tour</div>
-          <div class="row-detail"><a href="https://maps.google.com/?q=Heroes+Square+Budapest">Heroes' Square</a> · <a href="https://maps.google.com/?q=Vajdahunyad+Castle+Budapest">Vajdahunyad Castle</a> · Parliament · Nyugati Station</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~12:30</div>
-        <div class="row-body">
-          <div class="row-name">
-            <a href="https://maps.google.com/?q=Street+Food+Karaván+Kazinczy+Budapest">Street Food Karaván</a>
-            <span class="tags"><span class="tag tag-lunch">Lunch</span></span>
-          </div>
-          <div class="row-detail">Kazinczy u. 18 · Lángos, burgers, 8 food trucks</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">🌇 Afternoon &amp; Evening — All three</div>
-      <div class="row">
-        <div class="row-time">14:00</div>
-        <div class="row-body">
-          <div class="row-name">Joana lands · Check-in Airbnb</div>
-          <div class="row-detail">Ferenc körút 34, District IX</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~17:00</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Gellért+Hill+Budapest">Gellért Hill</a></div>
-          <div class="row-detail">15 min walk from Airbnb · Panoramic views · Citadelle Café at the top</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">19:30</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Silver+Line+Cruise+Budapest">Silver Line Sunset Cruise</a></div>
-          <div class="row-detail">Dock 11, near Elizabeth Bridge · ~70 min · from ~€9/person</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~21:00</div>
-        <div class="row-body">
-          <div class="row-name">
-            <a href="https://maps.google.com/?q=Twentysix+Budapest+Király+u">Twentysix Budapest</a>
-            <span class="tags"><span class="tag tag-dinner">Dinner</span><span class="tag tag-book">Résa</span></span>
-          </div>
-          <div class="row-detail">Király u. 26 · Tropical indoor jungle · Mediterranean</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- ───── DAY 2 ───── -->
-  <section class="day" id="day2">
-    <div class="day-label">Day 2 · Tuesday</div>
-    <div class="day-title">Buda Side + Termes</div>
-    <div class="day-theme">Imperial Budapest &amp; Panoramas</div>
-
-    <div class="card">
-      <div class="card-header">🦁 Buda Walking Tour</div>
-      <div class="row">
-        <div class="row-time">~10:00</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Chain+Bridge+Budapest">Chain Bridge</a></div>
-          <div class="row-detail">Cross on foot · views · 10–15 min</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~10:20</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Budavári+Sikló+Budapest">Funicular</a> <em style="font-size:12px;color:var(--muted)">(Budavári Sikló)</em></div>
-          <div class="row-detail">Clark Ádám tér → Castle Hill · ~€8/person</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~10:30</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Buda+Castle+Budapest">Buda Castle &amp; Royal Palace</a></div>
-          <div class="row-detail">Grounds · Matthias Fountain · Turul statue · views over Pest</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~11:30</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Fisherman%27s+Bastion+Budapest">Fisherman's Bastion</a></div>
-          <div class="row-detail">Best panoramic views in Budapest · lower terrace free · upper ~€4</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~12:15</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Matthias+Church+Budapest">Matthias Church</a> <em style="font-size:12px;color:var(--muted)">(exterior)</em></div>
-          <div class="row-detail">Diamond-pattern tiled roof</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~12:35</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Vienna+Gate+Budapest">Vienna Gate</a> <em style="font-size:12px;color:var(--muted)">(Bécsi Kapu)</em></div>
-          <div class="row-detail">Medieval north gate · quiet · great views</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~13:00</div>
-        <div class="row-body">
-          <div class="row-name">
-            <a href="https://maps.google.com/?q=Fekete+Holló+Budapest">Fekete Holló</a>
-            <span class="tags"><span class="tag tag-lunch">Lunch</span></span>
-          </div>
-          <div class="row-detail">Castle District · Medieval vaulted interior · catfish paprikash</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">🛁 Afternoon — Baths</div>
-      <div class="row">
-        <div class="row-time">~14:45</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Gül+Baba+Türbe+Budapest">Gül Baba Garden &amp; Türbe</a></div>
-          <div class="row-detail">Ottoman garden · 5 min walk from Lukács · 15 min</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">15:00</div>
-        <div class="row-body">
-          <div class="row-name">
-            <a href="https://maps.google.com/?q=Lukács+Thermal+Baths+Budapest">Lukács Thermal Baths</a>
-            <span class="tags"><span class="tag tag-baths">Baths</span></span>
-          </div>
-          <div class="row-detail">Frankel Leó út 25-29 · from ~€18 · open until 22:00 on Tuesdays</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">🌙 Evening</div>
-      <div class="row">
-        <div class="row-time">19:30</div>
-        <div class="row-body">
-          <div class="row-name">
-            <a href="https://maps.google.com/?q=Kádár+Étkezde+Budapest">Kádár Étkezde</a>
-            <span class="tags"><span class="tag tag-dinner">Dinner</span><span class="tag tag-book">Résa</span></span>
-          </div>
-          <div class="row-detail">District VII · Communal tables · Chicken paprikás</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">21:00</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=New+York+Kávéház+Budapest">New York Café</a></div>
-          <div class="row-detail">Erzsébet krt. 9-11 · Dobos Torte · Most beautiful café in the world</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">22:00</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Szimpla+Kert+Budapest">Szimpla Kert</a></div>
-          <div class="row-detail">Kazinczy u. 14 · The original ruin bar</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- ───── DAY 3 ───── -->
-  <section class="day" id="day3">
-    <div class="day-label">Day 3 · Wednesday</div>
-    <div class="day-title">Bory Castle + Margaret Island</div>
-    <div class="day-theme">Fairytale &amp; Romantic Escape</div>
-
-    <div class="card">
-      <div class="card-header">🚉 Day trip — Székesfehérvár</div>
-      <div class="row">
-        <div class="row-time">~09:30</div>
-        <div class="row-body">
-          <div class="row-name">Train to Székesfehérvár</div>
-          <div class="row-detail">From Kelenföld · direct · ~50 min · ~€3–4/person</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">10:30</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Bory+Castle+Székesfehérvár">Bory Castle</a></div>
-          <div class="row-detail">Máriavölgy u. 54 · Built over 40 years as a love monument · ~€5/person · 2.5h</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~13:30</div>
-        <div class="row-body">
-          <div class="row-name">Lunch on Fő utca
-            <span class="tags"><span class="tag tag-lunch">Lunch</span></span>
-          </div>
-          <div class="row-detail">Cobblestone street · Baroque buildings · TBD on arrival</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~14:30</div>
-        <div class="row-body">
-          <div class="row-name">Train back to Budapest</div>
-          <div class="row-detail">~50 min · arrive Kelenföld ~15:20</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">🌿 Afternoon — <a href="https://maps.google.com/?q=Margaret+Island+Budapest" style="color:var(--text);border-bottom:1.5px solid var(--gold);text-decoration:none;">Margaret Island</a></div>
-      <div class="row">
-        <div class="row-time">~16:00</div>
-        <div class="row-body">
-          <div class="row-name">Musical Fountain · Rose Garden · Ruins · Water Tower · Japanese Garden</div>
-          <div class="row-detail">~2h stroll · full bloom in April</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">🌙 Evening</div>
-      <div class="row">
-        <div class="row-time">19:30</div>
-        <div class="row-body">
-          <div class="row-name">
-            <a href="https://maps.google.com/?q=Salt+Budapest+Királyi+Pál+utca">Salt Budapest</a>
-            <span class="tags"><span class="tag tag-dinner">Dinner</span></span>
-          </div>
-          <div class="row-detail">Királyi Pál utca, District IX · Cosy · Jazz &amp; soul · Modern cuisine</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~21:30</div>
-        <div class="row-body">
-          <div class="row-name">🧖 Self Care Night</div>
-          <div class="row-detail">Face masks · Film + popcorn · Airbnb</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- ───── DAY 4 ───── -->
-  <section class="day" id="day4">
-    <div class="day-label">Day 4 · Thursday</div>
-    <div class="day-title">Pest in Full + Rudas + 🎂</div>
-    <div class="day-theme">Culture, Hidden Gems &amp; Birthday Evening</div>
-
-    <div class="card">
-      <div class="card-header">🌅 Morning</div>
-      <div class="row">
-        <div class="row-time">~09:30</div>
-        <div class="row-body">
-          <div class="row-name">Ráday utca — Morning coffee</div>
-          <div class="row-detail">Budapest's café street · 5 min from Airbnb</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~10:10</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Liberty+Bridge+Budapest">Liberty Bridge</a> <em style="font-size:12px;color:var(--muted)">(Szabadság híd)</em></div>
-          <div class="row-detail">Green iron bridge · Turul birds · small markets at Pest foot</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">🛒 Midday — Grand Marché</div>
-      <div class="row">
-        <div class="row-time">11:00</div>
-        <div class="row-body">
-          <div class="row-name">
-            <a href="https://maps.google.com/?q=Great+Market+Hall+Budapest">Grand Marché Central</a>
-            <span class="tags"><span class="tag tag-lunch">Lunch</span></span>
-          </div>
-          <div class="row-detail">Fővám tér 1-3 · Ground floor: paprika, Tokaji, palinka · 1st floor: lángos + chimney cake 🍮</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">🚶 Afternoon — Pest Circuit</div>
-      <div class="row">
-        <div class="row-time">~13:30</div>
-        <div class="row-body">
-          <div class="row-name">Danube Promenade</div>
-          <div class="row-detail">Walk north · views of Buda Castle &amp; all bridges</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~14:00</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Párisi+Udvar+Budapest">Párisi Udvar</a></div>
-          <div class="row-detail">Art Nouveau arcade · stained glass · Zsolnay tiles · hidden gem</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~14:35</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Shoes+on+the+Danube+Budapest">Shoes on the Danube</a></div>
-          <div class="row-detail">Holocaust memorial · 60 iron shoes · quiet and powerful</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~15:10</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Hungarian+Parliament+Budapest">Parliament</a></div>
-          <div class="row-detail">Exterior · Kossuth tér · one of the most impressive buildings in Europe</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~15:35</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=St+Stephen%27s+Basilica+Budapest">St. Stephen's Basilica</a></div>
-          <div class="row-detail">Exterior + interior · optional dome climb (~€8)</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~16:20</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=New+York+Kávéház+Budapest">New York Café</a></div>
-          <div class="row-detail">Dobos Torte + coffee · 30 min</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~16:55</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Ervin+Szabó+Library+Budapest">Ervin Szabó Library</a> 🔍</div>
-          <div class="row-detail">Gold Room · spiral staircase · crystal chandeliers · hidden gem · 30 min</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~17:30</div>
-        <div class="row-body">
-          <div class="row-name"><a href="https://maps.google.com/?q=Dohány+Street+Synagogue+Budapest">Jewish Quarter &amp; Dohány Synagogue</a></div>
-          <div class="row-detail">Street art · exterior + courtyard · ~45 min</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">🛁 Evening — Baths &amp; Birthday Dinner</div>
-      <div class="row">
-        <div class="row-time">18:30</div>
-        <div class="row-body">
-          <div class="row-name">
-            <a href="https://maps.google.com/?q=Rudas+Thermal+Baths+Budapest">Rudas Thermal Baths — Rooftop</a>
-            <span class="tags"><span class="tag tag-baths">Baths</span></span>
-          </div>
-          <div class="row-detail">Döbrentei tér 9 · ~€30/person · rooftop pool · Danube view · sunset ~20:00</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">~20:30</div>
-        <div class="row-body">
-          <div class="row-name">
-            <a href="https://maps.google.com/?q=Mazel+Tov+Budapest">Mazel Tov</a> 🎂
-            <span class="tags"><span class="tag tag-dinner">Dinner</span><span class="tag tag-book">Résa</span></span>
-          </div>
-          <div class="row-detail">Akácfa u. 47 · Fairy lights · Mediterranean-Hungarian · Anniversary dinner</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- ───── DAY 5 ───── -->
-  <section class="day" id="day5">
-    <div class="day-label">Day 5 · Friday</div>
-    <div class="day-title">Departure ✈️</div>
-    <div class="day-theme">See you next time, Budapest 🥲</div>
-
-    <div class="card">
-      <div class="row">
-        <div class="row-time">Morning</div>
-        <div class="row-body">
-          <div class="row-name">Breakfast at Airbnb · Pack up</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-time">TBD</div>
-        <div class="row-body">
-          <div class="row-name">Transfer to airport</div>
-          <div class="row-detail">Metro M3 + Bus 200E</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- ───── BUDGET ───── -->
-  <section class="budget">
-    <div class="budget-title">💶 Estimated Budget per person</div>
-    <div class="budget-grid">
-      <div class="budget-card">
-        <div class="budget-day">Day 1</div>
-        <div class="budget-amount">€35–65</div>
-      </div>
-      <div class="budget-card">
-        <div class="budget-day">Day 2</div>
-        <div class="budget-amount">€45–65</div>
-      </div>
-      <div class="budget-card">
-        <div class="budget-day">Day 3</div>
-        <div class="budget-amount">€25–35</div>
-      </div>
-      <div class="budget-card">
-        <div class="budget-day">Day 4</div>
-        <div class="budget-amount">€65–90</div>
-      </div>
-      <div class="budget-card budget-total">
-        <div class="budget-day">Total · activities only</div>
-        <div class="budget-amount">~€170–255</div>
-      </div>
-    </div>
-    <div class="budget-note">* Excludes flights · Airbnb · personal shopping</div>
-  </section>
-
+  <p>20 → 24 avril 2026<br>Tu es qui ?</p>
+  <div class="person-btns">
+    <button class="person-btn" onclick="setPerson('Aurélie')">👩 Aurélie</button>
+    <button class="person-btn" onclick="setPerson('Joana')">👩 Joana</button>
+    <button class="person-btn" onclick="setPerson('Manon')">👩 Manon</button>
+  </div>
 </div>
 
-<footer>🇭🇺 Budapest · April 2026 · Aurélie, Manon &amp; Joana</footer>
+<!-- APP -->
+<div id="app">
 
+  <!-- HEADER -->
+  <header class="app-header">
+    <div>
+      <div class="app-header h2" id="header-title">Budapest 🇭🇺</div>
+      <div class="app-header sub" id="header-sub">20–24 avril 2026</div>
+    </div>
+    <button class="avatar-btn" id="avatar-btn" onclick="resetPerson()" title="Changer de personne"></button>
+  </header>
+
+  <!-- TODAY SCREEN -->
+  <div class="screen active" id="screen-today">
+    <div id="today-content"></div>
+  </div>
+
+  <!-- ITINERARY SCREEN -->
+  <div class="screen" id="screen-itinerary">
+    <div class="day-tabs" id="day-tabs"></div>
+    <div id="day-panels"></div>
+  </div>
+
+  <!-- PACKING SCREEN -->
+  <div class="screen" id="screen-packing">
+    <div class="packing-header">
+      <div class="packing-tabs" id="packing-tabs">
+        <button class="packing-tab active" onclick="setPackSection('must')">✅ Must have</button>
+        <button class="packing-tab" onclick="setPackSection('nice')">✨ Nice to have</button>
+      </div>
+      <div class="packing-progress">
+        <div class="progress-bar"><div class="progress-fill" id="pack-progress-fill"></div></div>
+        <span class="progress-text" id="pack-progress-text">0 / 0</span>
+      </div>
+    </div>
+    <div class="packing-body" id="packing-body"></div>
+  </div>
+
+  <!-- INFO SCREEN -->
+  <div class="screen" id="screen-info">
+    <div class="info-body" id="info-body"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" id="nav-today" onclick="goTo('today')">
+      <span class="icon">🏠</span><span>Aujourd'hui</span>
+    </button>
+    <button class="nav-btn" id="nav-itinerary" onclick="goTo('itinerary')">
+      <span class="icon">📅</span><span>Itinéraire</span>
+    </button>
+    <button class="nav-btn" id="nav-packing" onclick="goTo('packing')">
+      <span class="icon">🎒</span><span>Valise</span>
+    </button>
+    <button class="nav-btn" id="nav-info" onclick="goTo('info')">
+      <span class="icon">ℹ️</span><span>Infos</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+
+const TRIP_START = new Date('2026-04-20');
+const TRIP_END   = new Date('2026-04-24');
+
+const DAYS = [
+  {
+    num: 1, date: '2026-04-20', label: 'Lun 20', title: 'Arrivée + Gellért Hill + Croisière',
+    theme: 'Cinema & Complicity — Reunion & Softness', emoji: '✈️',
+    sections: [
+      { title: '☀️ Matin — Aurélie & Manon', rows: [
+        { t:'08:20', n:'Atterrissage Budapest Airport', d:null, l:null },
+        { t:'~09:45', n:'Dorado Café', d:'Dohány utca 13 · Petit déj', l:'https://maps.google.com/?q=Dorado+Café+Dohány+utca+Budapest' },
+        { t:'10:15', n:'Marvel Walking Tour', d:'Heroes\' Square · Vajdahunyad Castle · Parliament · Nyugati Station', l:null, links:[{t:"Heroes' Square",l:'https://maps.google.com/?q=Heroes+Square+Budapest'},{t:"Vajdahunyad Castle",l:'https://maps.google.com/?q=Vajdahunyad+Castle+Budapest'}] },
+        { t:'~12:30', n:'Street Food Karaván', d:'Kazinczy u. 18 · Lángos, burgers, 8 food trucks', l:'https://maps.google.com/?q=Street+Food+Karaván+Budapest', tags:['lunch'] },
+      ]},
+      { title: '🌇 Après-midi & Soirée — Toutes les trois', rows: [
+        { t:'14:00', n:'Joana atterrit · Check-in Airbnb', d:'Ferenc körút 34, District IX', l:null },
+        { t:'~17:00', n:'Gellért Hill', d:'15 min à pied · Vue panoramique · Café Citadelle au sommet', l:'https://maps.google.com/?q=Gellért+Hill+Budapest' },
+        { t:'19:30', n:'Silver Line Sunset Cruise', d:'Dock 11, près du pont Élisabeth · ~70 min · dès ~€9/pers', l:'https://maps.google.com/?q=Silver+Line+Cruise+Budapest' },
+        { t:'~21:00', n:'Twentysix Budapest', d:'Király u. 26 · Jungle tropicale · Méditerranéen', l:'https://maps.google.com/?q=Twentysix+Budapest', tags:['dinner','book'] },
+      ]},
+    ]
+  },
+  {
+    num: 2, date: '2026-04-21', label: 'Mar 21', title: 'Côté Buda + Termes', emoji: '🏰',
+    theme: 'Imperial Budapest & Panoramas',
+    sections: [
+      { title: '🦁 Tour Buda', rows: [
+        { t:'~10:00', n:'Chain Bridge', d:'À pied · vues · 10–15 min', l:'https://maps.google.com/?q=Chain+Bridge+Budapest' },
+        { t:'~10:20', n:'Funiculaire (Budavári Sikló)', d:'Clark Ádám tér → Castle Hill · ~€8/pers', l:'https://maps.google.com/?q=Budavári+Sikló+Budapest' },
+        { t:'~10:30', n:'Buda Castle & Palais Royal', d:'Grounds · Fontaine Matthias · Turul · vues sur Pest', l:'https://maps.google.com/?q=Buda+Castle+Budapest' },
+        { t:'~11:30', n:"Fisherman's Bastion", d:'Meilleures vues · terrasse basse gratuite · haute ~€4', l:'https://maps.google.com/?q=Fisherman%27s+Bastion+Budapest' },
+        { t:'~12:15', n:'Matthias Church (extérieur)', d:'Toit à motifs de diamants', l:'https://maps.google.com/?q=Matthias+Church+Budapest' },
+        { t:'~12:35', n:'Vienna Gate (Bécsi Kapu)', d:'Porte médiévale · calme · belles vues', l:'https://maps.google.com/?q=Vienna+Gate+Budapest' },
+        { t:'~13:00', n:'Fekete Holló', d:'Castle District · Intérieur voûté médiéval · Paprikash', l:'https://maps.google.com/?q=Fekete+Holló+Budapest', tags:['lunch'] },
+      ]},
+      { title: '🛁 Après-midi — Termes', rows: [
+        { t:'~14:45', n:'Gül Baba Garden & Türbe', d:'Jardin ottoman · 5 min de Lukács · 15 min', l:'https://maps.google.com/?q=Gül+Baba+Türbe+Budapest' },
+        { t:'15:00', n:'Lukács Thermal Baths', d:'Frankel Leó út 25-29 · dès ~€18 · ouvert jusqu\'à 22h', l:'https://maps.google.com/?q=Lukács+Thermal+Baths+Budapest', tags:['baths'] },
+      ]},
+      { title: '🌙 Soirée', rows: [
+        { t:'19:30', n:'Kádár Étkezde', d:'District VII · Tables communes · Poulet paprikás', l:'https://maps.google.com/?q=Kádár+Étkezde+Budapest', tags:['dinner','book'] },
+        { t:'21:00', n:'New York Café', d:'Erzsébet krt. 9-11 · Dobos Torte · Le plus beau café du monde', l:'https://maps.google.com/?q=New+York+Kávéház+Budapest' },
+        { t:'22:00', n:'Szimpla Kert', d:'Kazinczy u. 14 · Le ruin bar original', l:'https://maps.google.com/?q=Szimpla+Kert+Budapest' },
+      ]},
+    ]
+  },
+  {
+    num: 3, date: '2026-04-22', label: 'Mer 22', title: 'Bory Castle + Île Marguerite', emoji: '🏯',
+    theme: 'Fairytale & Romantic Escape',
+    sections: [
+      { title: '🚉 Excursion — Székesfehérvár', rows: [
+        { t:'~09:30', n:'Train vers Székesfehérvár', d:'Depuis Kelenföld · direct · ~50 min · ~€3–4/pers', l:null },
+        { t:'10:30', n:'Bory Castle', d:'Máriavölgy u. 54 · Construit sur 40 ans, monument d\'amour · ~€5/pers · 2h30', l:'https://maps.google.com/?q=Bory+Castle+Székesfehérvár' },
+        { t:'~13:30', n:'Déjeuner Fő utca', d:'Rue pavée · bâtiments baroques · au choix sur place', l:null, tags:['lunch'] },
+        { t:'~14:30', n:'Train retour Budapest', d:'~50 min · arrivée Kelenföld ~15:20', l:null },
+      ]},
+      { title: '🌿 Après-midi — Île Marguerite', rows: [
+        { t:'~16:00', n:'Margaret Island', d:'Fontaine musicale · Roseraie · Ruines · Tour à eau · Jardin japonais · ~2h', l:'https://maps.google.com/?q=Margaret+Island+Budapest' },
+      ]},
+      { title: '🌙 Soirée', rows: [
+        { t:'19:30', n:'Salt Budapest', d:'Királyi Pál utca, District IX · Cosy · Jazz & soul · Cuisine moderne', l:'https://maps.google.com/?q=Salt+Budapest+Királyi+Pál+utca', tags:['dinner'] },
+        { t:'~21:30', n:'🧖 Self Care Night', d:'Masques · Film + popcorn · Airbnb', l:null },
+      ]},
+    ]
+  },
+  {
+    num: 4, date: '2026-04-23', label: 'Jeu 23', title: 'Côté Pest + Rudas + 🎂', emoji: '🏙️',
+    theme: 'Culture, Hidden Gems & Birthday Evening',
+    sections: [
+      { title: '🌅 Matin', rows: [
+        { t:'~09:30', n:'Ráday utca — Café du matin', d:'Rue des cafés de Budapest · 5 min de l\'Airbnb', l:null },
+        { t:'~10:10', n:'Liberty Bridge (Szabadság híd)', d:'Pont en fer vert · oiseaux Turul · petits marchés', l:'https://maps.google.com/?q=Liberty+Bridge+Budapest' },
+      ]},
+      { title: '🛒 Midi — Grand Marché', rows: [
+        { t:'11:00', n:'Grand Marché Central', d:'Fővám tér 1-3 · RDC: paprika, Tokaji, pálinka · 1er étage: déjeuner + chimney cake 🍮', l:'https://maps.google.com/?q=Great+Market+Hall+Budapest', tags:['lunch'] },
+      ]},
+      { title: '🚶 Après-midi — Circuit Pest', rows: [
+        { t:'~13:30', n:'Promenade du Danube', d:'Vers le nord · vues Buda Castle & tous les ponts', l:null },
+        { t:'~14:00', n:'Párisi Udvar', d:'Arcade Art Nouveau · vitraux · carreaux Zsolnay', l:'https://maps.google.com/?q=Párisi+Udvar+Budapest' },
+        { t:'~14:35', n:'Shoes on the Danube', d:'Mémorial de l\'Holocauste · 60 chaussures en fer · puissant', l:'https://maps.google.com/?q=Shoes+on+the+Danube+Budapest' },
+        { t:'~15:10', n:'Parlement', d:'Extérieur · Kossuth tér · l\'un des bâtiments les plus impressionnants d\'Europe', l:'https://maps.google.com/?q=Hungarian+Parliament+Budapest' },
+        { t:'~15:35', n:'Basilique Saint-Étienne', d:'Extérieur + intérieur · montée dôme optionnelle (~€8)', l:'https://maps.google.com/?q=St+Stephen%27s+Basilica+Budapest' },
+        { t:'~16:20', n:'New York Café', d:'Dobos Torte + café · 30 min', l:'https://maps.google.com/?q=New+York+Kávéház+Budapest' },
+        { t:'~16:55', n:'Ervin Szabó Library 🔍', d:'Gold Room · escalier en colimaçon · lustres en cristal · gem caché', l:'https://maps.google.com/?q=Ervin+Szabó+Library+Budapest' },
+        { t:'~17:30', n:'Quartier Juif & Dohány Synagogue', d:'Street art · cour · ~45 min', l:'https://maps.google.com/?q=Dohány+Street+Synagogue+Budapest' },
+      ]},
+      { title: '🛁 Soirée — Termes & Dîner d\'anniversaire', rows: [
+        { t:'18:30', n:'Rudas Thermal Baths — Rooftop', d:'Döbrentei tér 9 · ~€30/pers · piscine rooftop · vue Danube · coucher ~20:00', l:'https://maps.google.com/?q=Rudas+Thermal+Baths+Budapest', tags:['baths'] },
+        { t:'~20:30', n:'Mazel Tov 🎂', d:'Akácfa u. 47 · Guirlandes · Méditerranéen-Hongrois · Dîner d\'anniversaire', l:'https://maps.google.com/?q=Mazel+Tov+Budapest', tags:['dinner','book'] },
+      ]},
+    ]
+  },
+  {
+    num: 5, date: '2026-04-24', label: 'Ven 24', title: 'Départ ✈️', emoji: '🥲',
+    theme: 'See you next time, Budapest',
+    sections: [
+      { title: '🌅 Matin', rows: [
+        { t:'Matin', n:'Petit déj à l\'Airbnb · Bagages', d:null, l:null },
+        { t:'TBD', n:'Transfert aéroport', d:'Métro M3 + Bus 200E', l:null },
+      ]},
+    ]
+  }
+];
+
+const PACKING = {
+  must: [
+    { cat:'Vêtements', item:'Veste légère' },
+    { cat:'Vêtements', item:'Pulls / manches longues' },
+    { cat:'Vêtements', item:'Chaussures de marche confortables' },
+    { cat:'Vêtements', item:'Écharpe (légère)' },
+    { cat:'Vêtements', item:'Maillot de bain' },
+    { cat:'Vêtements', item:'Tongs (pour les thermes)' },
+    { cat:'Vêtements', item:'Serviette microfibre' },
+    { cat:'Toilette', item:'Brosse à dents & dentifrice' },
+    { cat:'Toilette', item:'Shampoing & gel douche' },
+    { cat:'Toilette', item:'Crème hydratante' },
+    { cat:'Toilette', item:'Crème solaire' },
+    { cat:'Toilette', item:'Déodorant' },
+    { cat:'Toilette', item:'Brosse à cheveux' },
+    { cat:'Thermes', item:'Housse étanche pour téléphone' },
+    { cat:'Thermes', item:'Bouteille d\'eau réutilisable' },
+    { cat:'Tech', item:'Téléphone + chargeur' },
+    { cat:'Tech', item:'Batterie portable' },
+    { cat:'Documents', item:'Passeport' },
+    { cat:'Documents', item:'Confirmation de vol' },
+    { cat:'Documents', item:'Assurance voyage' },
+    { cat:'Extras', item:'Petit sac à dos / day bag' },
+    { cat:'Extras', item:'Lunettes de soleil' },
+    { cat:'Extras', item:'Masque de sommeil' },
+    { cat:'Extras', item:'Bonnet de nuit' },
+    { cat:'Extras', item:'Médicaments (+ ordonnance)' },
+  ],
+  nice: [
+    { cat:'Toilette', item:'Rasoir' },
+    { cat:'Toilette', item:'Maquillage' },
+    { cat:'Thermes', item:'Sac plastique pour affaires mouillées' },
+    { cat:'Tech', item:'Écouteurs' },
+    { cat:'Documents', item:'Itinéraire imprimé' },
+    { cat:'Extras', item:'Snacks' },
+    { cat:'Extras', item:'Carnet & stylo' },
+    { cat:'Extras', item:'Livre ou liseuse' },
+    { cat:'Extras', item:'iPad' },
+    { cat:'Extras', item:'Jeu de cartes' },
+    { cat:'Extras', item:'Masques de beauté' },
+  ]
+};
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+
+let currentPerson = null;
+let currentScreen = 'today';
+let currentPackSection = 'must';
+let currentDayIndex = 0;
+
+function getTodayDayIndex() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  for (let i = 0; i < DAYS.length; i++) {
+    const d = new Date(DAYS[i].date);
+    if (today.getTime() === d.getTime()) return i;
+  }
+  return -1; // before or after trip
+}
+
+function getTripStatus() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const start = new Date(TRIP_START.getFullYear(), TRIP_START.getMonth(), TRIP_START.getDate());
+  const end   = new Date(TRIP_END.getFullYear(), TRIP_END.getMonth(), TRIP_END.getDate());
+  if (today < start) return 'before';
+  if (today > end)   return 'after';
+  return 'during';
+}
+
+function getDaysUntil() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const start = new Date(TRIP_START.getFullYear(), TRIP_START.getMonth(), TRIP_START.getDate());
+  return Math.round((start - today) / (1000*60*60*24));
+}
+
+// ─────────────────────────────────────────────
+// PERSON / ONBOARDING
+// ─────────────────────────────────────────────
+
+function setPerson(name) {
+  currentPerson = name;
+  localStorage.setItem('budapest_person', name);
+  document.getElementById('onboarding').classList.add('hidden');
+  document.getElementById('avatar-btn').textContent = name[0];
+  renderAll();
+}
+
+function resetPerson() {
+  if (confirm('Changer de personne ?')) {
+    currentPerson = null;
+    localStorage.removeItem('budapest_person');
+    document.getElementById('onboarding').classList.remove('hidden');
+    document.getElementById('avatar-btn').textContent = '?';
+  }
+}
+
+function initPerson() {
+  const saved = localStorage.getItem('budapest_person');
+  if (saved) {
+    currentPerson = saved;
+    document.getElementById('onboarding').classList.add('hidden');
+    document.getElementById('avatar-btn').textContent = saved[0];
+  }
+}
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+
+function goTo(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + screen).classList.add('active');
+  document.getElementById('nav-' + screen).classList.add('active');
+  currentScreen = screen;
+  updateHeader(screen);
+}
+
+function updateHeader(screen) {
+  const titles = { today: 'Budapest 🇭🇺', itinerary: 'Itinéraire', packing: 'Valise', info: 'Infos' };
+  const subs   = { today: '20–24 avril 2026', itinerary: '5 jours · 4 nuits', packing: currentPerson ? `Checklist de ${currentPerson}` : 'Checklist', info: 'Transport · Phrases · Shopping' };
+  document.getElementById('header-title').textContent = titles[screen] || 'Budapest 🇭🇺';
+  document.getElementById('header-sub').textContent = subs[screen] || '';
+}
+
+// ─────────────────────────────────────────────
+// RENDER HELPERS
+// ─────────────────────────────────────────────
+
+function renderRow(row) {
+  const tags = (row.tags||[]).map(t => `<span class="tag tag-${t}">${t==='dinner'?'Dîner':t==='lunch'?'Déj':t==='baths'?'Termes':'Résa'}</span>`).join('');
+  const tagSpan = tags ? `<span class="tags">${tags}</span>` : '';
+  const name = row.l
+    ? `<a href="${row.l}" target="_blank" rel="noopener">${row.n}</a>${tagSpan}`
+    : `${row.n}${tagSpan}`;
+  const detail = row.d ? `<div class="row-detail">${row.d}</div>` : '';
+  return `<div class="row"><div class="row-time">${row.t}</div><div class="row-body"><div class="row-name">${name}</div>${detail}</div></div>`;
+}
+
+function renderDayCard(day) {
+  return day.sections.map(sec => `
+    <div class="card">
+      <div class="card-header">${sec.title}</div>
+      ${sec.rows.map(renderRow).join('')}
+    </div>
+  `).join('');
+}
+
+// ─────────────────────────────────────────────
+// TODAY SCREEN
+// ─────────────────────────────────────────────
+
+function renderToday() {
+  const status = getTripStatus();
+  const el = document.getElementById('today-content');
+
+  if (status === 'before') {
+    const d = getDaysUntil();
+    el.innerHTML = `
+      <div class="today-hero">
+        <div class="today-date">Budapest · 20 avril 2026</div>
+        <h1>On y est presque ! ✈️</h1>
+        <div class="today-theme">Préparez vos valises, les filles</div>
+      </div>
+      <div class="today-body">
+        <div class="pretrip-card">
+          <h2>Plus que</h2>
+          <div class="countdown">${d} jour${d>1?'s':''}</div>
+          <p>Le voyage commence le <strong>lundi 20 avril</strong>.<br>Ta valise est prête ?</p>
+          <button class="cta-btn" onclick="goTo('packing')">Voir ma checklist 🎒</button>
+        </div>
+        <div style="margin-bottom:8px;font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.07em;">Aperçu du voyage</div>
+        ${DAYS.map((day, i) => `
+          <div class="card" style="cursor:pointer" onclick="goTo('itinerary');setDayTab(${i})">
+            <div class="row">
+              <div class="row-time" style="flex:0 0 40px;font-size:16px">${day.emoji}</div>
+              <div class="row-body">
+                <div class="row-name">${day.label} — ${day.title}</div>
+                <div class="row-detail">${day.theme}</div>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>`;
+    return;
+  }
+
+  if (status === 'after') {
+    el.innerHTML = `
+      <div class="today-hero">
+        <div class="today-date">Budapest · avril 2026</div>
+        <h1>C'était magique 🥲</h1>
+        <div class="today-theme">Zero regrets (sauf si vous avez sauté les thermes)</div>
+      </div>
+      <div class="today-body">
+        <div class="pretrip-card">
+          <h2>Le voyage est terminé</h2>
+          <p>Budapest restera pour toujours dans nos cœurs.<br>À la prochaine aventure !</p>
+          <button class="cta-btn" onclick="goTo('itinerary')">Revoir l'itinéraire 📅</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  // During the trip
+  const idx = getTodayDayIndex();
+  if (idx < 0) return;
+  const day = DAYS[idx];
+  const dots = DAYS.map((d, i) => `<div class="progress-dot${i<=idx?' done':''}"></div>`).join('');
+
+  el.innerHTML = `
+    <div class="today-hero">
+      <div class="today-date">${day.label}</div>
+      <h1>${day.emoji} ${day.title}</h1>
+      <div class="today-theme">${day.theme}</div>
+      <div class="today-progress">${dots}</div>
+    </div>
+    <div class="today-body">
+      ${renderDayCard(day)}
+    </div>`;
+}
+
+// ─────────────────────────────────────────────
+// ITINERARY SCREEN
+// ─────────────────────────────────────────────
+
+function renderItinerary() {
+  const tabs = document.getElementById('day-tabs');
+  const panels = document.getElementById('day-panels');
+  tabs.innerHTML = DAYS.map((d, i) => `<button class="day-tab${i===0?' active':''}" id="tab-${i}" onclick="setDayTab(${i})">${d.emoji} ${d.label}</button>`).join('');
+  panels.innerHTML = DAYS.map((d, i) => `
+    <div class="day-content${i===0?' active':''}" id="panel-${i}">
+      <div class="day-intro">
+        <span class="pill">Jour ${d.num}</span>
+        <h2>${d.emoji} ${d.title}</h2>
+        <p>${d.theme}</p>
+      </div>
+      ${renderDayCard(d)}
+    </div>
+  `).join('');
+}
+
+function setDayTab(i) {
+  document.querySelectorAll('.day-tab').forEach((t,j) => t.classList.toggle('active', j===i));
+  document.querySelectorAll('.day-content').forEach((p,j) => p.classList.toggle('active', j===i));
+  document.getElementById('screen-itinerary').scrollTo(0, 0);
+}
+
+// ─────────────────────────────────────────────
+// PACKING SCREEN
+// ─────────────────────────────────────────────
+
+function packKey(person, section, item) {
+  return `pack_${person}_${section}_${item.replace(/\s+/g,'_')}`;
+}
+
+function isChecked(item) {
+  if (!currentPerson) return false;
+  return localStorage.getItem(packKey(currentPerson, currentPackSection, item)) === '1';
+}
+
+function togglePack(item) {
+  if (!currentPerson) return;
+  const key = packKey(currentPerson, currentPackSection, item);
+  const val = localStorage.getItem(key) === '1' ? '0' : '1';
+  localStorage.setItem(key, val);
+  renderPacking();
+}
+
+function setPackSection(section) {
+  currentPackSection = section;
+  document.querySelectorAll('.packing-tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('onclick').includes(`'${section}'`));
+  });
+  renderPacking();
+}
+
+function renderPacking() {
+  const items = PACKING[currentPackSection];
+  const checkedCount = items.filter(x => isChecked(x.item)).length;
+  const pct = items.length ? Math.round(checkedCount / items.length * 100) : 0;
+  document.getElementById('pack-progress-fill').style.width = pct + '%';
+  document.getElementById('pack-progress-text').textContent = `${checkedCount} / ${items.length}`;
+
+  // Group by category
+  const byCat = {};
+  items.forEach(x => { (byCat[x.cat] = byCat[x.cat]||[]).push(x); });
+
+  document.getElementById('packing-body').innerHTML = Object.entries(byCat).map(([cat, catItems]) => `
+    <div class="packing-section">
+      <div class="packing-section-title">${cat}</div>
+      <div class="packing-card">
+        ${catItems.map(x => {
+          const checked = isChecked(x.item);
+          return `<div class="pack-item${checked?' checked':''}" onclick="togglePack('${x.item.replace(/'/g,"\\'")}')">
+            <div class="pack-checkbox"></div>
+            <div class="item-name">${x.item}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  // Update header sub
+  if (currentScreen === 'packing') {
+    document.getElementById('header-sub').textContent = currentPerson ? `Checklist de ${currentPerson}` : 'Checklist';
+  }
+}
+
+// ─────────────────────────────────────────────
+// INFO SCREEN
+// ─────────────────────────────────────────────
+
+function renderInfo() {
+  document.getElementById('info-body').innerHTML = `
+
+    <!-- TRANSPORT -->
+    <div class="info-card">
+      <div class="info-card-header" onclick="toggleInfo(this)">
+        🚌 Transport <span style="margin-left:auto;color:var(--muted);font-size:13px">▾</span>
+      </div>
+      <div class="info-card-body">
+        <div class="callout green">🎟 <strong>Meilleure option : Pass 7 jours · 6 000 HUF (~15€)</strong><br>Couvre tous les bus, trams et métros BKK.</div>
+        <div style="font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin:12px 0 6px">Hors-pass (pour toutes)</div>
+        <div class="info-row"><span>Bus 100E aéroport (A&M seulement)</span><span class="val">600 HUF</span></div>
+        <div class="info-row"><span>Funiculaire Sikló</span><span class="val">~3 200 HUF</span></div>
+        <div class="info-row"><span>Train MÁV A/R Székesfehérvár</span><span class="val">~6–8€/pers</span></div>
+        <div class="info-row"><span>Taxi gare → Bory Castle</span><span class="val">~1 500 HUF partagé</span></div>
+        <div style="margin-top:12px;font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">Conseils</div>
+        <div class="info-row"><span>App recommandée</span><span class="val">Budapest Go</span></div>
+        <div class="info-row"><span>VTC recommandé</span><span class="val">Bolt (> taxis)</span></div>
+        <div class="info-row"><span>Vélos en libre-service</span><span class="val">MOL Bubi</span></div>
+      </div>
+    </div>
+
+    <!-- BUDGET -->
+    <div class="info-card">
+      <div class="info-card-header" onclick="toggleInfo(this)">
+        💶 Budget estimé <span style="margin-left:auto;color:var(--muted);font-size:13px">▾</span>
+      </div>
+      <div class="info-card-body">
+        <div class="info-row"><span>Jour 1</span><span class="val">€35–65</span></div>
+        <div class="info-row"><span>Jour 2</span><span class="val">€45–65</span></div>
+        <div class="info-row"><span>Jour 3</span><span class="val">€25–35</span></div>
+        <div class="info-row"><span>Jour 4</span><span class="val">€65–90</span></div>
+        <div class="info-row"><span style="font-weight:700">Total activités</span><span class="val" style="font-size:16px">~€170–255</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">* Hors vols · Airbnb · achats perso</div>
+      </div>
+    </div>
+
+    <!-- HUNGARIAN PHRASES -->
+    <div class="info-card">
+      <div class="info-card-header" onclick="toggleInfo(this)">
+        🇭🇺 Parler hongrois <span style="margin-left:auto;color:var(--muted);font-size:13px">▾</span>
+      </div>
+      <div class="info-card-body">
+        <div class="callout" style="margin-bottom:12px">Budapest se prononce <strong>BoudaPESCHT</strong> — Natacha avait raison !</div>
+        ${[
+          ['Bonjour','Helló','heh-loh'],
+          ['Au revoir','Sziasztok!','see-as-tok'],
+          ['Oui / Non','Igen / Nem','ee-gen / nem'],
+          ['S\'il vous plaît','Kérem','kay-rem'],
+          ['Merci','Köszönöm','Ke ce neum'],
+          ['Excusez-moi','Elnézést','el-neh-zesht'],
+          ['Combien ça coûte ?','Mennyibe kerül?','men-yee-be keh-rool'],
+          ['Où sont les toilettes ?','Hol van a fürdőszoba?','Hol van a fourdesoba'],
+          ['Je ne comprends pas','Nem értem','nem air-tem'],
+          ['C\'était délicieux !','Finom volt!','fee-nom volt'],
+          ['Santé !','Egészségedre!','egg-ace-shay-ged-reh'],
+        ].map(([fr,hu,pron]) => `
+          <div class="phrase-row">
+            <div class="phrase-fr">${fr}</div>
+            <div class="phrase-hu">${hu}</div>
+            <div class="phrase-pron">${pron}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- SHOPPING -->
+    <div class="info-card">
+      <div class="info-card-header" onclick="toggleInfo(this)">
+        🛍️ Shopping <span style="margin-left:auto;color:var(--muted);font-size:13px">▾</span>
+      </div>
+      <div class="info-card-body">
+        <div style="font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Meilleurs endroits</div>
+        <div class="info-row"><span>Grand Marché (1er étage)</span><span class="val">Jour 4</span></div>
+        <div class="info-row"><span>Memories of Hungary</span><span class="val">Centre ville</span></div>
+        <div class="info-row"><span>Paprika Market</span><span class="val">En ligne aussi</span></div>
+        <div style="font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin:12px 0 8px">Quoi acheter</div>
+        ${['Vin Tokaji','Paprika','Pálinka','Œufs peints','Broderies','Chocolat Stuhmer','Poupées hongroises'].map(i=>`<div class="info-row"><span>${i}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <!-- RÉSERVATIONS -->
+    <div class="info-card">
+      <div class="info-card-header" onclick="toggleInfo(this)">
+        📞 Réservations à faire <span style="margin-left:auto;color:var(--muted);font-size:13px">▾</span>
+      </div>
+      <div class="info-card-body">
+        <div class="callout" style="background:#fff8e8;color:#9a6100;margin-bottom:12px">⚠️ Ces trois restos demandent une réservation à l'avance.</div>
+        <div class="info-row"><span>Twentysix Budapest</span><span class="val">Lundi soir</span></div>
+        <div class="info-row"><span>Kádár Étkezde</span><span class="val">Mardi midi</span></div>
+        <div class="info-row"><span>Mazel Tov 🎂</span><span class="val">Jeudi soir</span></div>
+      </div>
+    </div>
+
+    <!-- AIRBNB -->
+    <div class="info-card">
+      <div class="info-card-header" onclick="toggleInfo(this)">
+        🏠 Airbnb <span style="margin-left:auto;color:var(--muted);font-size:13px">▾</span>
+      </div>
+      <div class="info-card-body">
+        <div class="info-row"><span>Adresse</span><span class="val">Ferenc körút 34</span></div>
+        <div class="info-row"><span>Arrondissement</span><span class="val">District IX</span></div>
+        <div class="info-row"><span>Check-in</span><span class="val">Lun 20 · 15:00</span></div>
+        <div class="info-row"><span>Check-out</span><span class="val">Ven 24 · matin</span></div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleInfo(header) {
+  const body = header.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+// ─────────────────────────────────────────────
+// RENDER ALL
+// ─────────────────────────────────────────────
+
+function renderAll() {
+  renderToday();
+  renderItinerary();
+  renderPacking();
+  renderInfo();
+  updateHeader(currentScreen);
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+
+initPerson();
+renderAll();
+if (currentPerson) renderAll(); // ensure packing is rendered with person
+
+</script>
 </body>
 </html>
