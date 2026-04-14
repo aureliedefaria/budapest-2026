@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -93,7 +94,10 @@
     .rb{flex:1;min-width:0}
     .rn{font-size:14px;font-weight:600;margin-bottom:2px;line-height:1.35}
     .rn a{color:var(--text);text-decoration:none;border-bottom:1.5px solid var(--gold);padding-bottom:1px}
-    .rd{font-size:12px;color:var(--muted);line-height:1.45}
+    .rd{font-size:12px;color:var(--muted);line-height:1.45;max-height:0;overflow:hidden;opacity:0;transition:max-height .25s ease-out,opacity .2s ease-out,margin .2s}
+    .row.open .rd{max-height:300px;opacity:1;margin-top:2px}
+    .row-chev{font-size:9px;color:var(--muted);margin-top:5px;flex-shrink:0;transition:transform .2s;opacity:.5}
+    .row.open .row-chev{transform:rotate(90deg);opacity:.8}
     .row-arrow{font-size:13px;color:var(--border);margin-top:1px;flex-shrink:0}
     .tags{display:inline-flex;gap:4px;margin-left:5px;vertical-align:middle}
     .tag{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 6px;border-radius:7px}
@@ -165,6 +169,18 @@
     .pi-tick{display:none;width:5px;height:9px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(42deg) translate(-1px,-1px)}
     .pi.checked .pi-tick{display:block}
     .pi-name{font-size:14px;flex:1;transition:color .2s}
+    .pi-del{width:24px;height:24px;border:none;background:none;color:var(--muted);font-size:16px;cursor:pointer;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s;opacity:0}
+    .pi:hover .pi-del,.pi:active .pi-del,.pi-del:focus{opacity:1}
+    .pi-del:hover{color:#c41230;background:rgba(196,18,48,.08)}
+    .pi-name[contenteditable]{outline:none;border-bottom:1px dashed var(--border);border-radius:0}
+    .pi-name[contenteditable]:focus{border-color:var(--gold)}
+    .pi-add-wrap{display:flex;gap:8px;padding:10px 14px;align-items:center}
+    .pi-add-input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;background:var(--card);color:var(--text);outline:none;font-family:inherit}
+    .pi-add-input:focus{border-color:var(--gold)}
+    .pi-add-input::placeholder{color:var(--muted)}
+    .pi-add-btn{width:34px;height:34px;border-radius:50%;border:none;background:var(--green);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .1s}
+    .pi-add-btn:active{transform:scale(.92)}
+    .pi-custom{background:rgba(200,146,42,.06)}
     .pi-cat{font-size:10px;color:var(--muted);background:var(--border);padding:2px 7px;border-radius:6px;flex-shrink:0}
 
     /* ── INFO ── */
@@ -241,12 +257,9 @@
     .insta-card-tags{font-size:11.5px;color:#aaa}
 
     /* ── SUBROWS (walking tour toggles) ── */
-    .sub-toggle{display:inline-flex;align-items:center;gap:4px;margin-top:5px;padding:3px 8px;border-radius:20px;background:var(--red-dim);border:none;color:var(--red);font-size:11.5px;font-weight:600;cursor:pointer;transition:background .15s}
-    .sub-toggle::after{content:'▾';font-size:10px;transition:transform .2s;display:inline-block}
-    .sub-toggle.open::after{transform:rotate(-180deg)}
-    .sub-toggle:active{background:rgba(196,18,48,.2)}
+    .sub-toggle{display:none}
     .srow-wrap{margin-top:6px;border-left:3px solid var(--red-dim);margin-left:2px;border-radius:0 0 8px 8px;overflow:hidden;display:none}
-    .srow-wrap.open{display:block}
+    .row.open .srow-wrap{display:block}
     .srow{display:flex;padding:8px 10px 8px 8px;gap:8px;border-bottom:1px solid var(--border);align-items:flex-start;cursor:default;transition:background .12s}
     .srow:last-child{border-bottom:none}
     .srow.tappable{cursor:pointer}
@@ -640,7 +653,7 @@ const DAYS=[
    {title_key:'afternoon',suffix:{fr:'— Toutes les trois',en:'— All three',pt:'— As três'},rows:[
     {t:'~14:00',n:{fr:"Joana atterrit · Check-in Airbnb",en:"Joana lands · Airbnb check-in",pt:"Joana aterra · Check-in Airbnb"},d:{fr:'Ferenc körút 34, District IX',en:'Ferenc körút 34, District IX',pt:'Ferenc körút 34, Distrito IX'},l:null},
     {t:'~17:00',n:'Gellért Hill',d:{fr:'15 min à pied · Vue panoramique · Café Citadelle au sommet',en:'15 min walk · Panoramic view · Citadel Café at the top',pt:'15 min a pé · Vista panorâmica · Café Citadela no topo'},l:'https://maps.google.com/?q=Gellért+Hill+Budapest',det:'Gellért Hill'},
-    {t:'19:30',n:'Silver Line Sunset Cruise',d:{fr:'Dock 11, près du pont Élisabeth · ~70 min · dès ~€9/pers',en:'Dock 11, near Elizabeth Bridge · ~70 min · from ~€9/person',pt:'Doca 11, perto da Ponte Elisabeth · ~70 min · a partir de ~€9/pers'},l:'https://maps.google.com/?q=Silver+Line+Cruise+Budapest',det:'Silver Line Sunset Cruise'},
+    {t:'19:30',n:{fr:'Croisière Prosecco & Bière illimités',en:'Unlimited Prosecco & Beer Cruise',pt:'Cruzeiro Prosecco & Cerveja ilimitados'},d:{fr:'Batthyányi Pier · ~70 min · 25€/pers · réservé et payé ✅',en:'Batthyányi Pier Departure · ~70 min · €25/person · booked & paid ✅',pt:'Cais Batthyányi · ~70 min · 25€/pers · reservado e pago ✅'},l:'https://maps.google.com/?q=Batthyányi+tér+Budapest',tags:['r']},
     {t:'~21:00',n:'Twentysix Budapest',d:{fr:'Király u. 26 · Jungle tropicale · Méditerranéen · résa',en:'Király u. 26 · Tropical jungle · Mediterranean · booking',pt:'Király u. 26 · Selva tropical · Mediterrâneo · reserva'},l:'https://maps.google.com/?q=Twentysix+Budapest',tags:['d','r']},
    ]},
   ]},
@@ -650,8 +663,8 @@ const DAYS=[
   theme:'Imperial Budapest & Panoramas',heroClass:'hero-d2',
   sections:[
    {title_key:'morning',suffix:{fr:'— Tour Buda',en:'— Buda Walk',pt:'— Passeio Buda'},rows:[
-    {t:'~09:00',n:'Leo Rooftop',d:{fr:'Clark Ádám tér 1 · Brunch sur le toit de l\'Hotel Clark · vue Danube & Pont des Chaînes · réservation recommandée',en:'Clark Ádám tér 1 · Rooftop brunch at Hotel Clark · Danube & Chain Bridge views · booking recommended',pt:'Clark Ádám tér 1 · Brunch no telhado do Hotel Clark · vista do Danúbio e Ponte das Correntes · reserva recomendada'},l:'https://maps.google.com/?q=Leo+Rooftop+Budapest',tags:['l']},
-    {t:'~10:30',n:{fr:'Buda Walking Tour',en:'Buda Walking Tour',pt:'Passeio a Pé Buda'},
+    {t:'~09:30',n:{fr:'Direction Chain Bridge',en:'Head to Chain Bridge',pt:'Rumo à Ponte das Correntes'},d:{fr:'Tram 2 (rive Pest) → Széchenyi István tér · ~15 min',en:'Tram 2 (Pest riverside) → Széchenyi István tér · ~15 min',pt:'Tram 2 (margem Pest) → Széchenyi István tér · ~15 min'},l:null},
+    {t:'~10:00',n:{fr:'Buda Walking Tour',en:'Buda Walking Tour',pt:'Passeio a Pé Buda'},
      d:{fr:'Chain Bridge → Funiculaire → Buda Castle → Palais Sándor → Bastions des Pêcheurs → Église Matthias → Porte de Vienne',
         en:'Chain Bridge → Funicular → Buda Castle → Sándor Palace → Fisherman\'s Bastion → Matthias Church → Vienna Gate',
         pt:'Ponte das Correntes → Funicular → Castelo de Buda → Palácio Sándor → Bastião dos Pescadores → Igreja Matthias → Portão de Viena'},
@@ -665,18 +678,23 @@ const DAYS=[
       {n:{fr:'Matthias Church (extérieur)',en:'Matthias Church (exterior)',pt:'Igreja Matthias (exterior)'},d:{fr:'Toit à motifs de diamants · tour extérieur',en:'Diamond-pattern tiled roof · walk the exterior',pt:'Teto com motivos de diamante · passeio pelo exterior'},l:'https://maps.google.com/?q=Matthias+Church+Budapest'},
       {n:{fr:'Vienna Gate (Bécsi Kapu)',en:'Vienna Gate (Bécsi Kapu)',pt:'Portão de Viena (Bécsi Kapu)'},d:{fr:'Porte médiévale nord · calme · belles vues',en:'Medieval north gate · quiet · lovely views',pt:'Portão medieval norte · tranquilo · belas vistas'},l:'https://maps.google.com/?q=Vienna+Gate+Budapest'},
      ]},
-    {t:'~13:00',n:'Fekete Holló',d:{fr:'Castle District · Voûtes médiévales · Paprikash de silure',en:'Castle District · Medieval vaulted interior · Catfish paprikash',pt:'Castle District · Interior abobadado medieval · Paprikash de bagre'},l:'https://maps.google.com/?q=Fekete+Holló+Budapest',tags:['l']},
+    {t:'13:30',n:'Fekete Holló',d:{fr:'Castle District · Voûtes médiévales · Paprikash de silure · réservé',en:'Castle District · Medieval vaulted interior · Catfish paprikash · booked',pt:'Castle District · Interior abobadado medieval · Paprikash de bagre · reservado'},l:'https://maps.google.com/?q=Fekete+Holló+Budapest',tags:['l','r']},
    ]},
    {title_key:'afternoon',suffix:{fr:'— Kolodko & Thermes',en:'— Kolodko & Baths',pt:'— Kolodko & Termas'},rows:[
-    {t:'~14:00',n:{fr:'Promenade Buda riverside · Kolodko',en:'Buda riverside walk · Kolodko',pt:'Passeio pela margem de Buda · Kolodko'},d:{fr:'Trabant (pont Marguerite) · Főkukac · Tiny Tank · Rubik\'s Cube · Dog Breeds',en:'Trabant (Margaret Bridge) · Főkukac · Tiny Tank · Rubik\'s Cube · Dog Breeds',pt:'Trabant (Ponte Margarida) · Főkukac · Tiny Tank · Cubo de Rubik · Raças de Cão'},l:null},
+    {t:'~14:30',n:{fr:'Promenade Buda riverside · Kolodko',en:'Buda riverside walk · Kolodko',pt:'Passeio pela margem de Buda · Kolodko'},d:{fr:'Trabant (pont Marguerite) · Főkukac (Bem Quay 15) · Tiny Tank (Bem Quay 27) · Rubik\'s Cube · Dog Breeds',en:'Trabant (Margaret Bridge) · Főkukac (Bem Quay 15) · Tiny Tank (Bem Quay 27) · Rubik\'s Cube · Dog Breeds',pt:'Trabant (Ponte Margarida) · Főkukac (Bem Quay 15) · Tiny Tank (Bem Quay 27) · Cubo de Rubik · Raças de Cão'},l:null},
     {t:'~14:45',n:{fr:'Gül Baba Garden & Türbe',en:'Gül Baba Garden & Türbe',pt:'Jardim & Türbe de Gül Baba'},d:{fr:'Jardin ottoman · ~€3 · 5 min de Lukács',en:'Ottoman tomb & quiet garden · ~€3 · 5 min from Lukács',pt:'Túmulo otomano & jardim tranquilo · ~€3 · 5 min de Lukács'},l:'https://maps.google.com/?q=Gül+Baba+Türbe+Budapest'},
-    {t:'15:00',n:'Lukács Thermal Baths',d:{fr:'Frankel Leó út 25-29 · dès ~€18 · ouvert jusqu\'à 22h',en:'Frankel Leó út 25-29 · from ~€18 · open until 10pm',pt:'Frankel Leó út 25-29 · a partir de ~€18 · aberto até 22h'},l:'https://maps.google.com/?q=Lukács+Thermal+Baths+Budapest',tags:['b'],det:'Lukács Thermal Baths'},
+    {t:'15:00',n:'Lukács Thermal Baths',d:{fr:'Frankel Leó út 25-29 · dès ~€18 · ouvert jusqu\'à 22h le mardi',en:'Frankel Leó út 25-29 · from ~€18 · open until 10pm on Tuesdays',pt:'Frankel Leó út 25-29 · a partir de ~€18 · aberto até 22h às terças'},l:'https://maps.google.com/?q=Lukács+Thermal+Baths+Budapest',tags:['b'],det:'Lukács Thermal Baths'},
+    {t:'~17:30',n:{fr:'Goûter — Frankel Leó út',en:'Snack — Frankel Leó út',pt:'Lanche — Frankel Leó út'},d:{fr:'Cafés juste à la sortie des thermes · terrasse · décompresser',en:'Cafés just outside the baths · terrace · decompress',pt:'Cafés logo à saída das termas · esplanada · descomprimir'},l:null},
+    {t:'~18:30',n:{fr:'Retour vers l\'Airbnb',en:'Head back toward Airbnb',pt:'Voltar para o Airbnb'},d:{fr:'Tram 19/41 → Tram 2',en:'Tram 19/41 → Tram 2',pt:'Tram 19/41 → Tram 2'},l:null},
    ]},
    {title_key:'evening',suffix:{fr:'',en:'',pt:''},rows:[
-    {t:'19:30',n:'Kádár Étkezde',d:{fr:'District VII · Tables communes · Poulet paprikás · résa',en:'District VII · Communal tables · Chicken paprikás · booking',pt:'Distrito VII · Mesas comunitárias · Frango paprikás · reserva'},l:'https://maps.google.com/?q=Kádár+Étkezde+Budapest',tags:['d','r']},
-    {t:'21:00',n:'New York Café',d:{fr:'Erzsébet krt. 9-11 · Dobos Torte · Le plus beau café du monde',en:'Erzsébet krt. 9-11 · Dobos Torte · Most beautiful café in the world',pt:'Erzsébet krt. 9-11 · Dobos Torte · O café mais bonito do mundo'},l:'https://maps.google.com/?q=New+York+Kávéház+Budapest',det:'New York Café'},
-    {t:'22:00',n:'Szimpla Kert',d:{fr:'Kazinczy u. 14 · Le premier ruin bar au monde',en:'Kazinczy u. 14 · The world\'s first ruin bar',pt:'Kazinczy u. 14 · O primeiro ruin bar do mundo'},l:'https://maps.google.com/?q=Szimpla+Kert+Budapest',det:'Szimpla Kert'},
-    {t:'~23:00',n:{fr:'Photobooth vintage 📸',en:'Vintage Photobooth 📸',pt:'Fotobooth vintage 📸'},d:{fr:'Kazinczy u. 7 · 50m de Szimpla · avant ou après le ruin bar · 🔍 2e: près de la gare Nyugati (à confirmer sur place)',en:'Kazinczy u. 7 · 50m from Szimpla · before or after the ruin bar · 🔍 2nd one: near Nyugati station (confirm on arrival)',pt:'Kazinczy u. 7 · 50m do Szimpla · antes ou depois do ruin bar · 🔍 2º: perto da estação Nyugati (confirmar no local)'},l:'https://maps.google.com/?q=Kazinczy+utca+7+Budapest'},
+    {t:'19:30',n:'Frici papa',d:{fr:'Király u. 55 · Cantine hongroise · Pas de réservation',en:'Király u. 55 · Hungarian canteen · No booking needed',pt:'Király u. 55 · Cantina húngara · Sem reserva'},l:'https://www.fricipapa.hu/',tags:['d']},
+    {t:'20:30',n:'Szimpla Kert',d:{fr:'Kazinczy u. 14 · Le premier ruin bar au monde',en:'Kazinczy u. 14 · The world\'s first ruin bar',pt:'Kazinczy u. 14 · O primeiro ruin bar do mundo'},l:'https://maps.google.com/?q=Szimpla+Kert+Budapest',det:'Szimpla Kert',
+     subrows:[
+      {n:{fr:'Photobooth vintage 📸',en:'Vintage Photobooth 📸',pt:'Fotobooth vintage 📸'},d:{fr:'Kazinczy u. 7 · 50m de Szimpla · avant ou après le ruin bar',en:'Kazinczy u. 7 · 50m from Szimpla · before or after the ruin bar',pt:'Kazinczy u. 7 · 50m do Szimpla · antes ou depois do ruin bar'},l:'https://maps.google.com/?q=Kazinczy+utca+7+Budapest'},
+      {n:{fr:'Photobooth Nyugati 📸',en:'Photobooth Nyugati 📸',pt:'Fotobooth Nyugati 📸'},d:{fr:'Près de la gare Nyugati · à confirmer sur place',en:'Near Nyugati station · confirm on arrival',pt:'Perto da estação Nyugati · confirmar no local'}},
+     ]},
+    {t:'22:00',n:'Leo Rooftop',d:{fr:'Clark Ádám tér 1 · Cocktails · Vue nocturne Danube & ponts illuminés · réservé',en:'Clark Ádám tér 1 · Cocktails · Night view of the Danube & illuminated bridges · booked',pt:'Clark Ádám tér 1 · Cocktails · Vista noturna do Danúbio e pontes iluminadas · reservado'},l:'https://maps.google.com/?q=Leo+Rooftop+Budapest',tags:['r']},
    ]},
   ]},
  {num:3,date:'2026-04-22',
@@ -685,15 +703,17 @@ const DAYS=[
   theme:'Fairytale & Romantic Escape',heroClass:'hero-d3',
   sections:[
    {title_key:'morning',suffix:{fr:'— Excursion Székesfehérvár',en:'— Day trip to Székesfehérvár',pt:'— Excursão a Székesfehérvár'},rows:[
-    {t:'~09:00',n:{fr:'Train vers Kelenföld',en:'Head to Kelenföld station',pt:'Ir para a estação Kelenföld'},d:{fr:'Tram 4/6 → Móricz Zsigmond körtér + Métro M4',en:'Tram 4/6 → Móricz Zsigmond körtér + Metro M4',pt:'Tramway 4/6 → Móricz Zsigmond körtér + Metrô M4'},l:null},
-    {t:'~09:30',n:{fr:'Train vers Székesfehérvár',en:'Train to Székesfehérvár',pt:'Comboio para Székesfehérvár'},d:{fr:'Direct · ~50 min · ~€3–4/pers · MÁV · acheter à l\'avance',en:'Direct · ~50 min · ~€3–4/person · MÁV · buy in advance',pt:'Direto · ~50 min · ~€3–4/pers · MÁV · comprar com antecedência'},l:null},
-    {t:'10:30',n:'Bory Castle',d:{fr:'Máriaölgy u. 54 · Monument d\'amour · ~€5/pers · ~2h30',en:'Máriaölgy u. 54 · Love monument · ~€5/person · ~2h30',pt:'Máriaölgy u. 54 · Monumento de amor · ~€5/pers · ~2h30'},l:'https://maps.google.com/?q=Bory+Castle+Székesfehérvár',det:'Bory Castle'},
+    {t:'~09:00',n:{fr:'Direction Kelenföld',en:'Head to Kelenföld station',pt:'Rumo à estação Kelenföld'},d:{fr:'Tram 4/6 → Móricz Zsigmond körtér + Métro M4 → Kelenföld · ~20 min',en:'Tram 4/6 → Móricz Zsigmond körtér + Metro M4 → Kelenföld · ~20 min',pt:'Tramway 4/6 → Móricz Zsigmond körtér + Metrô M4 → Kelenföld · ~20 min'},l:null},
+    {t:'9:12',n:{fr:'Train vers Székesfehérvár',en:'Train to Székesfehérvár',pt:'Comboio para Székesfehérvár'},d:{fr:'Direct · ~40 min · réservé ✅',en:'Direct · ~40 min · booked ✅',pt:'Direto · ~40 min · reservado ✅'},l:null,tags:['r']},
+    {t:'9:50',n:{fr:'Arrivée · Taxi vers Bory Castle',en:'Arrive · Taxi to Bory Castle',pt:'Chegada · Táxi para Castelo Bory'},d:{fr:'~5 min · ~1 500 HUF',en:'~5 min · ~1,500 HUF',pt:'~5 min · ~1 500 HUF'},l:null},
+    {t:'10:00',n:'Bory Castle',d:{fr:'Máriaölgy u. 54 · Monument d\'amour · ~€5/pers · ~2h30 · ouvert 09:00–17:00',en:'Máriaölgy u. 54 · Love monument · ~€5/person · ~2h30 · open 09:00–17:00',pt:'Máriaölgy u. 54 · Monumento de amor · ~€5/pers · ~2h30 · aberto 09:00–17:00'},l:'https://maps.google.com/?q=Bory+Castle+Székesfehérvár',det:'Bory Castle'},
     {t:'~13:00',n:{fr:'Promenade Old Town · Romkert',en:'Old Town stroll · Romkert ruins',pt:'Passeio pela Cidade Velha · Ruínas Romkert'},d:{fr:'Fő utca · bâtiments baroques · ruines de la basilique royale médiévale',en:'Fő utca · baroque buildings · ruins of the medieval royal coronation basilica',pt:'Fő utca · edifícios barrocos · ruínas da basílica real medieval'},l:null},
     {t:'~13:30',n:{fr:'Déjeuner Fő utca',en:'Lunch on Fő utca',pt:'Almoço na Fő utca'},d:{fr:'Terrasses · au choix sur place',en:'Terraces · choose on arrival',pt:'Esplanadas · escolha no local'},l:null,tags:['l']},
-    {t:'~14:30',n:{fr:'Train retour Budapest',en:'Train back to Budapest',pt:'Comboio de volta a Budapest'},d:{fr:'Direct · ~50 min · arrivée Kelenföld ~15:20',en:'Direct · ~50 min · arrive Kelenföld ~15:20',pt:'Direto · ~50 min · chegada Kelenföld ~15:20'},l:null},
+    {t:'14:37',n:{fr:'Train retour Budapest',en:'Train back to Budapest',pt:'Comboio de volta a Budapest'},d:{fr:'Direct · ~40 min · arrivée Kelenföld ~15:20',en:'Direct · ~40 min · arrive Kelenföld ~15:20',pt:'Direto · ~40 min · chegada Kelenföld ~15:20'},l:null},
    ]},
    {title_key:'afternoon',suffix:{fr:'— Île Marguerite',en:'— Margaret Island',pt:'— Ilha Margarida'},rows:[
-    {t:'16:00–18:00',n:{fr:'Margaret Island Walk',en:'Margaret Island Walk',pt:'Passeio Ilha Margarida'},
+    {t:'~15:30',n:{fr:'Direction Île Marguerite',en:'Head to Margaret Island',pt:'Rumo à Ilha Margarida'},d:{fr:'M4 → Móricz Zsigmond körtér → Tram 4/6 → Margit híd · ~20 min · entrée libre',en:'M4 → Móricz Zsigmond körtér → Tram 4/6 → Margit híd · ~20 min · free to enter',pt:'M4 → Móricz Zsigmond körtér → Tram 4/6 → Margit híd · ~20 min · entrada gratuita'},l:null},
+    {t:'16:00–18:15',n:{fr:'Margaret Island Walk',en:'Margaret Island Walk',pt:'Passeio Ilha Margarida'},
      d:{fr:'Fontaine musicale → Roseraie → Ruines médiévales → Tour de l\'eau → Jardin japonais',
         en:'Musical Fountain → Rose Garden → Medieval Ruins → Water Tower → Japanese Garden',
         pt:'Fonte Musical → Roseiral → Ruínas Medievais → Torre de Água → Jardim Japonês'},
@@ -707,7 +727,8 @@ const DAYS=[
      ]},
    ]},
    {title_key:'evening',suffix:{fr:'',en:'',pt:''},rows:[
-    {t:'19:30',n:'Salt Budapest',d:{fr:'Királyi Pál utca, District IX · Cosy · Jazz & soul · cuisine moderne',en:'Királyi Pál utca, District IX · Cosy · Jazz & soul · modern cuisine',pt:'Királyi Pál utca, Distrito IX · Aconchegante · Jazz & soul · cozinha moderna'},l:'https://maps.google.com/?q=Salt+Budapest',tags:['d']},
+    {t:'~18:15',n:{fr:'Retour · Tram 4/6 vers l\'Airbnb',en:'Head back · Tram 4/6 to Airbnb',pt:'Voltar · Tram 4/6 para o Airbnb'},d:{fr:'🔍 Option : Émile Afternoon Tea · thé élégant · alternative calme avant le dîner',en:'🔍 Option: Émile Afternoon Tea · elegant tea · calm alternative before dinner',pt:'🔍 Opção: Émile Afternoon Tea · chá elegante · alternativa calma antes do jantar'},l:null},
+    {t:'19:30',n:{fr:'Dîner — Ráday utca',en:'Dinner — Ráday utca',pt:'Jantar — Ráday utca'},d:{fr:'Ráday utca · dîner au choix · 5 min de l\'Airbnb',en:'Ráday utca · choose on arrival · 5 min from Airbnb',pt:'Ráday utca · escolha no local · 5 min do Airbnb'},l:'https://maps.google.com/?q=Ráday+utca+Budapest',tags:['d']},
     {t:'~21:30',n:{fr:'Self Care Night',en:'Self Care Night',pt:'Noite de Self Care'},d:{fr:'Masques · Film + popcorn · Airbnb',en:'Face masks · Film + popcorn · Airbnb',pt:'Máscaras faciais · Filme + pipoca · Airbnb'},l:null},
    ]},
   ]},
@@ -717,32 +738,36 @@ const DAYS=[
   theme:'Culture, Hidden Gems & Birthday Evening',heroClass:'hero-d4',
   sections:[
    {title_key:'morning',suffix:{fr:'',en:'',pt:''},rows:[
-    {t:'~09:30',n:{fr:'Ráday utca — Café du matin',en:'Ráday utca — Morning coffee',pt:'Ráday utca — Café da manhã'},d:{fr:'Rue des cafés · 5 min de l\'Airbnb',en:'Budapest\'s café street · 5 min from the Airbnb',pt:'A rua dos cafés · 5 min do Airbnb'},l:null},
-    {t:'~10:10',n:{fr:'Liberty Bridge (Szabadság híd)',en:'Liberty Bridge (Szabadság híd)',pt:'Ponte da Liberdade (Szabadság híd)'},d:{fr:'Pont en fer vert · Turul · Kolodko : Franz Joseph dans un hamac',en:'Green iron bridge · Turul birds · Kolodko: Franz Joseph in a hammock',pt:'Ponte de ferro verde · Turul · Kolodko: Francisco José numa rede'},l:'https://maps.google.com/?q=Liberty+Bridge+Budapest'},
-    {t:'11:00',n:{fr:'Grand Marché Central',en:'Great Market Hall',pt:'Grande Mercado Central'},d:{fr:'Fővám tér 1-3 · RDC: paprika, Tokaji, pálinka · 1er: chimney cake Molnár\'s 🍮',en:'Fővám tér 1-3 · Ground floor: paprika, Tokaji, pálinka · 1st floor: chimney cake Molnár\'s 🍮',pt:'Fővám tér 1-3 · Térreo: páprica, Tokaji, pálinka · 1º andar: chimney cake Molnár\'s 🍮'},l:'https://maps.google.com/?q=Great+Market+Hall+Budapest',tags:['l'],det:'Grand Marché Central'},
-    {t:'~13:30',n:'Frici Papa',d:{fr:'Király utca 55, District VII · Cantine hongroise · Grosses portions · Prix mini · Plan de Joana 🙌',en:'Király utca 55, District VII · Hungarian canteen · Hearty portions · Budget prices · Joana\'s pick 🙌',pt:'Király utca 55, Distrito VII · Cantina húngara · Porções generosas · Preços mini · Dica da Joana 🙌'},l:'https://maps.google.com/?q=Frici+Papa+Budapest',tags:['l']},
+    {t:'~09:30',n:{fr:'Promenade matinale',en:'Morning Walk',pt:'Passeio matinal'},d:{fr:'Ráday utca · café street · 5 min de l\'Airbnb · coffee to go',en:'Ráday utca · café street · 5 min from the Airbnb · coffee to go',pt:'Ráday utca · rua dos cafés · 5 min do Airbnb · café para levar'},l:null,
+     subrows:[
+      {n:{fr:'Ráday utca',en:'Ráday utca',pt:'Ráday utca'},d:{fr:'Rue des cafés · 5 min de l\'Airbnb · coffee to go',en:'Budapest\'s café street · 5 min from the Airbnb · coffee to go',pt:'A rua dos cafés · 5 min do Airbnb · café para levar'}},
+      {n:{fr:'Vámház körút',en:'Vámház körút',pt:'Vámház körút'},d:{fr:'Architecture austro-hongroise · échauffement pour la journée',en:'Austro-Hungarian architecture · warm-up for the day',pt:'Arquitetura austro-húngara · aquecimento para o dia'}},
+      {n:{fr:'Liberty Bridge ⭐',en:'Liberty Bridge ⭐',pt:'Ponte da Liberdade ⭐'},d:{fr:'Pont en fer vert · Turul · 🗿 Kolodko : Franz Joseph dans un hamac',en:'Green iron bridge · Turul birds · 🗿 Kolodko: Franz Joseph in a hammock',pt:'Ponte de ferro verde · Turul · 🗿 Kolodko: Francisco José numa rede'},l:'https://maps.google.com/?q=Liberty+Bridge+Budapest'},
+     ]},
+    {t:'~11:00',n:{fr:'Grand Marché Central',en:'Great Market Hall',pt:'Grande Mercado Central'},d:{fr:'Fővám tér 1-3 · RDC: paprika, Tokaji, pálinka, Stuhmer, œufs peints · 1er: lángos + chimney cake Molnár\'s (premier avec Joana 🎉) · 🗿 Kolodko: Libido (Belgrád Quay 26) · Piszkos Fred',en:'Fővám tér 1-3 · Ground: paprika, Tokaji, pálinka, Stuhmer, painted eggs · 1st: lángos + chimney cake Molnár\'s (first with Joana 🎉) · 🗿 Kolodko: Libido (Belgrád Quay 26) · Piszkos Fred',pt:'Fővám tér 1-3 · Térreo: páprica, Tokaji, pálinka, Stuhmer, ovos pintados · 1º: lángos + chimney cake Molnár\'s (primeiro com Joana 🎉) · 🗿 Kolodko: Libido (Belgrád Quay 26) · Piszkos Fred'},l:'https://maps.google.com/?q=Great+Market+Hall+Budapest',tags:['l'],det:'Grand Marché Central'},
+    {t:'~13:30',n:'Kádár Étkezde',d:{fr:'District VII · Tables communes · Nappes à carreaux · Poulet paprikás · Service du midi uniquement · réservé',en:'District VII · Communal tables · Chequered tablecloths · Chicken paprikás · Lunch service only · booked',pt:'Distrito VII · Mesas comunitárias · Toalhas xadrez · Frango paprikás · Serviço de almoço apenas · reservado'},l:'https://maps.google.com/?q=Kádár+Étkezde+Budapest',tags:['l','r']},
    ]},
    {title_key:'afternoon',suffix:{fr:'— Circuit Pest',en:'— Pest Circuit',pt:'— Circuito Pest'},rows:[
-    {t:'13:30–18:30',n:{fr:'Circuit Pest',en:'Pest Circuit',pt:'Circuito Pest'},
-     d:{fr:'Promenade Danube → Párisi Udvar → Lune → Shoes on the Danube → Parlement → Basilique → Gerbeaud → Ervin Szabó → Quartier Juif',
-        en:'Danube Promenade → Párisi Udvar → Lune → Shoes on the Danube → Parliament → Basilica → Gerbeaud → Ervin Szabó → Jewish Quarter',
-        pt:'Passeio Danúbio → Párisi Udvar → Lune → Sapatos no Danúbio → Parlamento → Basílica → Gerbeaud → Ervin Szabó → Bairro Judeu'},
+    {t:'~14:30',n:{fr:'Circuit Pest',en:'Pest Circuit',pt:'Circuito Pest'},
+     d:{fr:'Promenade Danube → Párisi Udvar → Lune → Shoes on the Danube → Parlement → Basilique → New York Café → Ervin Szabó → Quartier Juif',
+        en:'Danube Promenade → Párisi Udvar → Lune → Shoes on the Danube → Parliament → Basilica → New York Café → Ervin Szabó → Jewish Quarter',
+        pt:'Passeio Danúbio → Párisi Udvar → Lune → Sapatos no Danúbio → Parlamento → Basílica → New York Café → Ervin Szabó → Bairro Judeu'},
      l:null,
      subrows:[
       {n:{fr:'Promenade du Danube (Duna-korzó)',en:'Danube Promenade (Duna-korzó)',pt:'Passeio do Danúbio (Duna-korzó)'},d:{fr:'Vers le nord · vues Buda Castle & tous les ponts',en:'Head north · views of Buda Castle & all the bridges',pt:'Em direção ao norte · vistas do Castelo de Buda e todas as pontes'}},
       {n:'Párisi Udvar',d:{fr:'Arcade Art Nouveau 1909 · plafond en vitrail · carreaux Zsolnay · entrée libre',en:'1909 Art Nouveau arcade · stained glass ceiling · Zsolnay tiles · free entry',pt:'Galeria Art Nouveau de 1909 · teto de vitral · azulejos Zsolnay · entrada gratuita'},l:'https://maps.google.com/?q=Párisi+Udvar+Budapest'},
       {n:{fr:'Lune · Piarista köz',en:'Lune · Piarista köz',pt:'Lune · Piarista köz'},d:{fr:'Réplique de la lune dans une ruelle · installation permanente · gratuit',en:'Moon replica in an alleyway · permanent installation · free',pt:'Réplica da lua numa viela · instalação permanente · gratuita'},l:'https://maps.google.com/?q=Piarista+köz+Budapest'},
-      {n:{fr:'Shoes on the Danube',en:'Shoes on the Danube',pt:'Sapatos no Danúbio'},d:{fr:'Mémorial de l\'Holocauste · 60 chaussures en fer · 1944–45',en:'Holocaust memorial · 60 cast-iron shoes · 1944–45',pt:'Memorial do Holocausto · 60 sapatos de ferro fundido · 1944–45'},l:'https://maps.google.com/?q=Shoes+on+the+Danube+Budapest',det:'Shoes on the Danube'},
-      {n:{fr:'Parlement',en:'Parliament',pt:'Parlamento'},d:{fr:'Extérieur · Kossuth tér · Musée d\'Ethnographie en face (terrasse gratuite)',en:'Exterior · Kossuth tér · Museum of Ethnography opposite (free terrace)',pt:'Exterior · Kossuth tér · Museu de Etnografia em frente (terraço gratuito)'},l:'https://maps.google.com/?q=Hungarian+Parliament+Budapest',det:'Parliament'},
-      {n:{fr:'Basilique Saint-Étienne',en:"St. Stephen's Basilica",pt:'Basílica de Santo Estêvão'},d:{fr:'Main droite de Saint Étienne · dôme optionnel ~€8',en:"St Stephen's mummified right hand · dome optional ~€8",pt:'Mão direita de Santo Estêvão · cúpula opcional ~€8'},l:'https://maps.google.com/?q=St+Stephen%27s+Basilica+Budapest'},
-      {n:{fr:'Gerbeaud · Vörösmarty tér',en:'Gerbeaud · Vörösmarty tér',pt:'Gerbeaud · Vörösmarty tér'},d:{fr:'Pâtisserie fondée en 1858 · Dobos Torte · terrasse',en:"Patisserie since 1858 · Dobos Torte · terrace on Pest's best square",pt:'Pastelaria desde 1858 · Dobos Torte · esplanada'},l:'https://maps.google.com/?q=Gerbeaud+Budapest'},
-      {n:'Ervin Szabó Library',d:{fr:'Gold Room · escalier baroque · lustres en cristal · gem caché',en:'Gold Room · baroque staircase · crystal chandeliers · hidden gem',pt:'Gold Room · escadaria barroca · lustres de cristal · joia escondida'},l:'https://maps.google.com/?q=Ervin+Szabó+Library+Budapest',det:'Ervin Szabó Library'},
-      {n:{fr:'Quartier Juif & Synagogue',en:'Jewish Quarter & Synagogue',pt:'Bairro Judeu & Sinagoga'},d:{fr:'Kolodko Rubik\'s Cube · street art Sissy & Angel · Synagogue Dohány',en:"Kolodko Rubik's Cube · street art Sissy & Angel · Dohány Synagogue",pt:'Kolodko Cubo de Rubik · street art Sissy & Angel · Sinagoga Dohány'},l:'https://maps.google.com/?q=Dohány+Street+Synagogue+Budapest'},
+      {n:{fr:'Shoes on the Danube',en:'Shoes on the Danube',pt:'Sapatos no Danúbio'},d:{fr:'Mémorial de l\'Holocauste · 60 chaussures en fer · 1944–45 · 🗿 Kolodko: Lunar Rover · Among Us',en:'Holocaust memorial · 60 cast-iron shoes · 1944–45 · 🗿 Kolodko: Lunar Rover · Among Us',pt:'Memorial do Holocausto · 60 sapatos de ferro fundido · 1944–45 · 🗿 Kolodko: Lunar Rover · Among Us'},l:'https://maps.google.com/?q=Shoes+on+the+Danube+Budapest',det:'Shoes on the Danube'},
+      {n:{fr:'Parlement',en:'Parliament',pt:'Parlamento'},d:{fr:'Extérieur · Kossuth tér · Musée d\'Ethnographie (terrasse gratuite) · 🗿 Kolodko: Kermit · Ushanka · Axe',en:'Exterior · Kossuth tér · Museum of Ethnography (free rooftop) · 🗿 Kolodko: Kermit · Ushanka · Axe',pt:'Exterior · Kossuth tér · Museu de Etnografia (terraço gratuito) · 🗿 Kolodko: Kermit · Ushanka · Axe'},l:'https://maps.google.com/?q=Hungarian+Parliament+Budapest',det:'Parliament'},
+      {n:{fr:'Basilique Saint-Étienne',en:"St. Stephen's Basilica",pt:'Basílica de Santo Estêvão'},d:{fr:'Main droite momifiée de Saint Étienne · dôme optionnel ~€8',en:"St Stephen's mummified right hand · dome optional ~€8",pt:'Mão direita mumificada de Santo Estêvão · cúpula opcional ~€8'},l:'https://maps.google.com/?q=St+Stephen%27s+Basilica+Budapest'},
+      {n:'New York Café',d:{fr:'Erzsébet krt. 9-11 · Dobos Torte · le plus beau café du monde · ~45 min',en:'Erzsébet krt. 9-11 · Dobos Torte · most beautiful café in the world · ~45 min',pt:'Erzsébet krt. 9-11 · Dobos Torte · o café mais bonito do mundo · ~45 min'},l:'https://maps.google.com/?q=New+York+Kávéház+Budapest',det:'New York Café'},
+      {n:'Ervin Szabó Library',d:{fr:'Gold Room · escalier baroque · lustres en cristal · gem caché · Szabó Ervin tér 1',en:'Gold Room · baroque staircase · crystal chandeliers · hidden gem · Szabó Ervin tér 1',pt:'Gold Room · escadaria barroca · lustres de cristal · joia escondida · Szabó Ervin tér 1'},l:'https://maps.google.com/?q=Ervin+Szabó+Library+Budapest',det:'Ervin Szabó Library'},
+      {n:{fr:'Quartier Juif & Synagogue',en:'Jewish Quarter & Synagogue',pt:'Bairro Judeu & Sinagoga'},d:{fr:'Synagogue Dohány · street art Sissy & Angel · 🗿 Kolodko: Tivadar Herzl · Garfield (Dembinszky u.)',en:"Dohány Synagogue · street art Sissy & Angel · 🗿 Kolodko: Tivadar Herzl · Garfield (Dembinszky u.)",pt:'Sinagoga Dohány · street art Sissy & Angel · 🗿 Kolodko: Tivadar Herzl · Garfield (Dembinszky u.)'},l:'https://maps.google.com/?q=Dohány+Street+Synagogue+Budapest'},
      ]},
    ]},
    {title_key:'evening',suffix:{fr:'— Termes & Anniversaire',en:'— Baths & Birthday',pt:'— Termas & Aniversário'},rows:[
-    {t:'18:30',n:'Rudas Thermal Baths — Rooftop',d:{fr:'Döbrentei tér 9 · ~€30/pers · vue Danube · coucher ~20:00 · réserver en ligne',en:'Döbrentei tér 9 · ~€30/person · Danube view · sunset ~8pm · book online',pt:'Döbrentei tér 9 · ~€30/pers · vista do Danúbio · pôr do sol ~20:00 · reserve online'},l:'https://maps.google.com/?q=Rudas+Thermal+Baths+Budapest',tags:['b'],det:'Rudas Thermal Baths — Rooftop'},
-    {t:'~20:30',n:'Mazel Tov 🎂',d:{fr:'Akácfa u. 47 · Guirlandes · Verdure · Méditerranéen-Hongrois · résa',en:'Akácfa u. 47 · String lights · Lush greenery · Mediterranean-Hungarian · booking',pt:'Akácfa u. 47 · Luzes de guirlanda · Vegetação · Mediterrâneo-Húngaro · reserva'},l:'https://maps.google.com/?q=Mazel+Tov+Budapest',tags:['d','r']},
+    {t:'17:30',n:'Rudas Thermal Baths — Rooftop',d:{fr:'Döbrentei tér 9 · ~€30/pers · vue Danube · bassins évacués à 19:40 · réserver en ligne',en:'Döbrentei tér 9 · ~€30/person · Danube view · pools cleared at 7:40pm · book online',pt:'Döbrentei tér 9 · ~€30/pers · vista do Danúbio · piscinas encerradas às 19:40 · reserve online'},l:'https://maps.google.com/?q=Rudas+Thermal+Baths+Budapest',tags:['b','r'],det:'Rudas Thermal Baths — Rooftop'},
+    {t:'21:00',n:'Mazel Tov 🎂',d:{fr:'Akácfa u. 47 · Guirlandes · Verdure · Méditerranéen-Hongrois · Joana (25 avr) & Aurélie (27 avr) · résa',en:'Akácfa u. 47 · String lights · Lush greenery · Mediterranean-Hungarian · Joana (25 Apr) & Aurélie (27 Apr) · booking',pt:'Akácfa u. 47 · Luzes de guirlanda · Vegetação · Mediterrâneo-Húngaro · Joana (25 abr) & Aurélie (27 abr) · reserva'},l:'https://maps.google.com/?q=Mazel+Tov+Budapest',tags:['d','r']},
     {t:'~22:30',n:'For Sale Pub',d:{fr:'Vámház körút 2 · 10 min de Mazel Tov · Musique live après 20h · Cacahuètes + sol de paille + murs de papiers · Ouvert jusqu\'à 1h',en:'Vámház körút 2 · 10 min from Mazel Tov · Live music after 8pm · Peanuts + straw floor + paper-covered walls · Open until 1am',pt:'Vámház körút 2 · 10 min do Mazel Tov · Música ao vivo após 20h · Amendoins + chão de palha + paredes de papéis · Aberto até 1h'},l:'https://maps.google.com/?q=For+Sale+Pub+Budapest'},
    ]},
   ]},
@@ -1131,33 +1156,37 @@ function toggleSub(id,ev){
   const b=ev.currentTarget;
   if(w){w.classList.toggle('open');b.classList.toggle('open');}
 }
+function toggleRow(el,e){
+  if(e.target.closest('a')||e.target.closest('.row-arrow'))return;
+  el.classList.toggle('open');
+}
 function renderRow(row){
   const lang=getLang();
   const tags=(row.tags||[]).map(k=>`<span class="tag ${TAGMAP[k]}">${TAGLBL[k]()}</span>`).join('');
   const tagSpan=tags?`<span class="tags">${tags}</span>`:'';
-  const arrow=row.det?`<span class="row-arrow">›</span>`:'';
+  const detArrow=row.det?`<span class="row-arrow" onclick="event.stopPropagation();openDetail('${row.det.replace(/'/g,"\\'")}')" title="Details">›</span>`:'';
   const rowN=tr_(row.n);
   const rowL=typeof row.l==='string'?row.l:null;
   const name=rowL?`<a href="${rowL}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${rowN}</a>${tagSpan}`:`${rowN}${tagSpan}`;
   const rowD=tr_(row.d);
   const detail=rowD?`<div class="rd">${rowD}</div>`:'';
-  const clickAttr=row.det?`onclick="openDetail('${row.det.replace(/'/g,"\\'")}')"`:'';
   const photo=row.det&&DETAILS[row.det]&&DETAILS[row.det].photo;
   const thumb=photo?`<img class="row-thumb" src="${photo}" loading="lazy" onerror="this.style.display='none'" alt="">`:'';
   const rowT=tr_(row.t);
+  const hasContent=rowD||(row.subrows&&row.subrows.length);
+  const chevron=hasContent?`<span class="row-chev">▸</span>`:'';
   let subHtml='';
   if(row.subrows&&row.subrows.length){
     const sid='sr'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
-    const nLang={en:'stops',fr:'étapes',pt:'paragens'}[getLang()]||'stops';
     const srowsHtml=row.subrows.map((s,i)=>{
       const sn=tr_(s.n); const sd=tr_(s.d)||'';
       const sl=s.l?`<a href="${s.l}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${sn}</a>`:sn;
       const sc=s.det?`onclick="openDetail('${s.det.replace(/'/g,"\\'")}')"`:'';
       return `<div class="srow${s.det?' tappable':''}" ${sc}><div class="srow-num">${i+1}</div><div class="srow-body"><div class="srow-name">${sl}</div>${sd?`<div class="srow-detail">${sd}</div>`:''}</div>${s.det?'<span class="row-arrow" style="font-size:11px;margin-top:2px">›</span>':''}</div>`;
     }).join('');
-    subHtml=`<button class="sub-toggle" onclick="toggleSub('${sid}',event)">${row.subrows.length} ${nLang}</button><div class="srow-wrap" id="srows-${sid}">${srowsHtml}</div>`;
+    subHtml=`<div class="srow-wrap" id="srows-${sid}">${srowsHtml}</div>`;
   }
-  return `<div class="row${row.det?' tappable':''}" ${clickAttr}><div class="rt">${rowT}</div>${thumb}<div class="rb"><div class="rn">${name}</div>${detail}${subHtml}</div>${arrow}</div>`;
+  return `<div class="row" onclick="toggleRow(this,event)"><div class="rt">${rowT}</div>${thumb}<div class="rb"><div class="rn">${name}</div>${detail}${subHtml}</div>${chevron}${detArrow}</div>`;
 }
 function renderDayCards(day){
   const seenKeys=new Set();
@@ -1277,14 +1306,44 @@ function setDayTab(i){
 // ═══════════════════════════════════════════════
 function pkKey(id){return`bp26_${currentPerson}_${currentPackSection}_${id}`}
 function isChk(id){return localStorage.getItem(pkKey(id))==='1'}
-function togglePk(id){
+function togglePk(id,e){
+  if(e)e.stopPropagation();
   const k=pkKey(id),v=localStorage.getItem(k)==='1'?'0':'1';
   localStorage.setItem(k,v);
   const el=document.querySelector(`[data-id="${CSS.escape(id)}"]`);
   if(el){el.classList.toggle('checked',v==='1');updatePackProgress();}
 }
+// ── Custom items per person+section stored in localStorage ──
+function customKey(){return`bp26_${currentPerson}_${currentPackSection}_custom`}
+function getCustomItems(){try{return JSON.parse(localStorage.getItem(customKey()))||[];}catch(e){return[];}}
+function saveCustomItems(arr){localStorage.setItem(customKey(),JSON.stringify(arr));}
+function addCustomItem(label,cat){
+  if(!label.trim())return;
+  const items=getCustomItems();
+  const id='cust_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  items.push({id,cat,label:label.trim()});
+  saveCustomItems(items);
+  renderPacking();
+}
+function deletePackItem(id,e){
+  if(e)e.stopPropagation();
+  const items=getCustomItems().filter(x=>x.id!==id);
+  saveCustomItems(items);
+  localStorage.removeItem(pkKey(id));
+  renderPacking();
+}
+function editPackItem(id,newLabel){
+  const items=getCustomItems();
+  const item=items.find(x=>x.id===id);
+  if(item){item.label=newLabel.trim();saveCustomItems(items);}
+}
+function getAllPackItems(){
+  const base=PACKING[currentPackSection]||[];
+  const custom=getCustomItems();
+  return [...base,...custom.map(c=>({id:c.id,cat:c.cat||{fr:'Perso',en:'Custom',pt:'Pessoal'},label:typeof c.label==='string'?{fr:c.label,en:c.label,pt:c.label}:c.label,custom:true}))];
+}
 function updatePackProgress(){
-  const items=PACKING[currentPackSection];
+  const items=getAllPackItems();
   const cnt=items.filter(x=>isChk(x.id)).length;
   document.getElementById('prog-fill').style.width=Math.round(cnt/items.length*100)+'%';
   document.getElementById('prog-txt').textContent=`${cnt} / ${items.length}`;
@@ -1292,11 +1351,13 @@ function updatePackProgress(){
 function renderPacking(){
   const el=document.getElementById('screen-packing');
   const lang=getLang();
+  const allItems=getAllPackItems();
   const byCat={};
-  PACKING[currentPackSection].forEach(x=>{
+  allItems.forEach(x=>{
     const catKey=tr_(x.cat);
     (byCat[catKey]=byCat[catKey]||[]).push(x);
   });
+  const addLabel={fr:'Ajouter un item…',en:'Add an item…',pt:'Adicionar item…'}[lang]||'Add…';
   el.innerHTML=`
     <div class="pack-hdr">
       <div class="pack-type-tabs">
@@ -1312,11 +1373,23 @@ function renderPacking(){
       ${Object.entries(byCat).map(([cat,items])=>`
         <div class="cat-label">${cat}</div>
         <div class="pack-card">
-          ${items.map(x=>`<div class="pi${isChk(x.id)?' checked':''}" data-id="${x.id}" onclick="togglePk('${x.id}')">
-            <div class="pi-check"><div class="pi-tick"></div></div>
-            <div class="pi-name">${tr_(x.label)}</div>
-          </div>`).join('')}
+          ${items.map(x=>{
+            const isCustom=!!x.custom;
+            const lbl=tr_(x.label);
+            const eid=CSS.escape(x.id);
+            return `<div class="pi${isChk(x.id)?' checked':''}${isCustom?' pi-custom':''}" data-id="${x.id}">
+              <div class="pi-check" onclick="togglePk('${x.id}',event)"><div class="pi-tick"></div></div>
+              <div class="pi-name"${isCustom?` contenteditable="true" onblur="editPackItem('${x.id}',this.textContent)"`:` onclick="togglePk('${x.id}',event)"`}>${lbl}</div>
+              ${isCustom?`<button class="pi-del" onclick="deletePackItem('${x.id}',event)" title="Supprimer">✕</button>`:''}
+            </div>`;
+          }).join('')}
         </div>`).join('')}
+      <div class="pack-card" style="margin-top:8px">
+        <div class="pi-add-wrap">
+          <input class="pi-add-input" id="pack-add-input" placeholder="${addLabel}" onkeydown="if(event.key==='Enter'){document.getElementById('pack-add-btn').click();event.preventDefault();}">
+          <button class="pi-add-btn" id="pack-add-btn" onclick="addCustomItem(document.getElementById('pack-add-input').value,{fr:'Perso',en:'Custom',pt:'Pessoal'})">+</button>
+        </div>
+      </div>
     </div>`;
   updatePackProgress();
 }
