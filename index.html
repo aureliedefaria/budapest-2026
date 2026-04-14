@@ -7,6 +7,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#1a0810">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="budapest-logo.svg">
+  <link rel="apple-touch-icon" href="budapest-logo.svg">
   <title>Budapest 2026 🇭🇺</title>
   <style>
     /* ── TOKENS ── */
@@ -1573,6 +1576,17 @@ function renderAll(){
 }
 initPerson();
 renderAll();
+
+// ═══════════════════════════════════════════════
+// SERVICE WORKER REGISTRATION
+// ═══════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
 </script>
 </body>
 </html>

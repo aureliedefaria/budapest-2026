@@ -1,0 +1,18 @@
+{
+  "name": "Budapest 2026 🇭🇺",
+  "short_name": "Budapest",
+  "description": "Trip itinerary — April 20–24, 2026",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a0810",
+  "theme_color": "#1a0810",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "budapest-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
